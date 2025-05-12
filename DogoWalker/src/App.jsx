@@ -1,10 +1,33 @@
-import { useState } from 'react'
+import { use, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "./firebase-config"
+import { useEffect } from 'react';
 
 function App() {
   const [count, setCount] = useState(0)
+
+  const docRef =doc(db, "users", "TxG1Ttj1jOCm2coM6Lxl");
+  
+  const getData= async () => {
+    const docSnap = getDoc(docRef).then((doc) => {
+    if (doc.exists()) {
+      console.log("Document data:", doc.data());
+    } else {
+      console.log("No such document!");
+    }
+    }).catch((error) => {
+      console.log("Error getting document:", error);
+    });
+    console.log(docSnap);  
+    }
+  
+  useEffect(() => {
+    getData();
+  }
+  , []);          
 
   return (
     <>
