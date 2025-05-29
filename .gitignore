@@ -7645,3 +7645,4 @@ node_modules/yargs-parser/build/lib/yargs-parser.js
 DogoWalker/src/.env
 DogoWalker/.env
 firebase-debug.log
+apphosting.yaml
