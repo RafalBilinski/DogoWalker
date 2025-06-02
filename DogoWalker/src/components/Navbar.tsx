@@ -1,15 +1,28 @@
 /// <reference types="vite-plugin-svgr/client" />
 
 import { Link, Outlet } from "react-router-dom";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
 import DogoWalker from "../assets/dogo-Walker.svg?react";
-//import { useAuth } from '../contexts/AuthContext';
-//import React, { } from 'react';
+import { useEffect, useState } from "react";
+import React, { } from 'react';
+import { useAuth } from "./AuthContext"; // Import the AuthContext to access currentUser
+
+
 
 const Navigation: React.FC = () => {
-  const { currentUser } = getAuth(); //useAuth();
-  const isUserLoggedIn = currentUser !== null;
-  console.log("is user logged?", isUserLoggedIn);
+  const { currentUser, signOutUser } = useAuth(); // Get currentUser directly from context
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsUserLoggedIn(!!currentUser); // Convert to boolean using !!
+  }, [currentUser]); // This will run whenever currentUser changes in the context
+
+  const signOutHandler = async () => {
+    try {
+      await signOutUser(); // Use the context's signOutUser function
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   const navbarItems = {
     home: {
@@ -31,18 +44,18 @@ const Navigation: React.FC = () => {
       id: "navbar-btn-home2",
     },
     about: {
-      name: "About",
+      name: "Menu",
       path: "/about",
       onlyLoggedIn: true,
       id: "navbar-btn-about",
     },
   };
-  console.log(currentUser);
+  console.log("Navbar render, user:", currentUser?.firebaseUser.displayName);
   return (
-    <div className="flex flex-col h-max w-screen bg-gray-600">
-      <nav className="w-fit px-5 self-center rounded-xl bg-neutral-100 border-b-0.5 border-gray-200 shadow-md sticky top-2 z-50 backdrop-blur-2xl">
+    <div  id="site" className="flex flex-col w-screen bg-gray-600 ">
+      <nav className="w-fit overflow-visible px-5 self-center rounded-xl bg-neutral-100 border-b-0.5 border-gray-200 shadow-2xl sticky top-2 z-50 backdrop-blur-2xl">
         <div className="px-4  flex">
-          <DogoWalker className=" h-10 w-10 mr-4 my-1 self-center" />
+          <DogoWalker className=" h-10 w-10 sm:mr-4 my-1 self-center" />
           <div className="flex ">
             {Object.values(navbarItems).map(
               (item) =>
@@ -59,9 +72,9 @@ const Navigation: React.FC = () => {
                 )
             )}
           </div>
-          <div className="ml-auto flex items-center">
+          <div className="ml-auto items-center hidden sm:flex">
             {isUserLoggedIn ? (
-              <button className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+              <button className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 " onClick={signOutHandler}>
                 Logout
               </button>
             ) : (
@@ -75,7 +88,7 @@ const Navigation: React.FC = () => {
           </div>
         </div>
       </nav>
-      <div className="container mx-auto px-4 py-6 h-max-screen">
+      <div className="container flex mx:0 mx-auto px-0 md:px-4 py-6 h-[calc(100vh-3rem)]" id="content">
         <Outlet />
       </div>
     </div>

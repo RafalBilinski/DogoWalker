@@ -15,10 +15,7 @@
 
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  min-width: max(320px, 100vw, min-content);
+  min-height: max(640px, 100vh, min-content);
 }
 

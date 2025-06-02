@@ -1,18 +1,11 @@
 @import "tailwindcss";
 
-#root {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-}
-
 @theme {
-  --color-secondary: #3b82f6;
-  --color-primary: #06b6d4;
-
-  --background-color: #4a5565;
-  --text-color: #333333;
-  --border-color: #e0e0e0;
+  --color-secondary: #3b82f6; /* blue-500 */
+  --color-primary: #06b6d4; /* cyan-500 */
+  --color-accent: #fbbf24;
+  --color-text-primary: white;
+  --color-text-secondary: #4a5565;
 }
 
 @layer components {
@@ -23,5 +16,22 @@
   .navbar-Button:hover {
     @apply text-black border-b-sky-500 border-b-2 bg-gray-100;
     @apply transition shadow-lg duration-300;
+  }
+  .homePage-section {
+    @apply flex items-center justify-center w-full h-full bg-center bg-cover rounded-lg shadow-lg min-h-0 ;
+    @apply transition  duration-1000 ;
+  }
+  .homePage-section:hover {
+    @apply outline-offset-1 outline-2 outline-sky-700 cursor-pointer;
+  }
+  .homePage-section-title{
+    @apply text-3xl  text-shadow-black text-shadow-md backdrop-blur-[1px] wrap-break-word mx-auto  min-h-0;
+    @apply lg:text-5xl  my-3 px-5 max-w-11/12;
+  }
+    .homePage-section-title:hover{
+    @apply  transition duration-600  cursor-pointer text-accent ;
+  }
+  .homePage-section-title:focus {
+    @apply transition duration-600  cursor-pointer text-accent;
   }
 }

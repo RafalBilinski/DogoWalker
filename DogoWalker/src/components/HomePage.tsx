@@ -1,42 +1,33 @@
-
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase-config"
-import { useEffect, useState } from 'react';
+import { db } from "../firebase-config";
+import { useEffect, useState } from "react";
 
 function HomePage() {
- const [count, setCount] = useState(0)
+  
 
-  const docRef =doc(db, "users", "CHLy717IbCTkjq843QnFHDajYlJ2");
-  
-  const getData= async () => {
-    const docSnap = getDoc(docRef).then((doc) => {
-    if (doc.exists()) {
-      console.log("Document data:", doc.data());
-    } else {
-      console.log("No such document!");
-    }
-    }).catch((error) => {
-      console.log("Error getting document:", error);
-    });
-    console.log(docSnap);  
-    }
-  
-  useEffect(() => {
-    getData();
-  }
-  , []);
-  
-  return(      
-    <div className='flex flex-col max-w-10/12 mx-auto py-5 items-center justify-center h-[calc(100vh-6rem)] bg-gradient-to-br from-primary to-secondary  text-white rounded-lg'>
-
-        <h1 className=' text-5xl '>Dogo Walker</h1>
-        <button className="button bg-white text-amber-950 p-5 rounded-full w-fit m-1 " onClick={() => setCount((count) => count + 1)}>
-          count is {count} 
-        </button>
-        <button className="button bg-white text-amber-950 p-5 rounded-full m-1" onClick={() => setCount(0)}>
-          Reset
-        </button>
+  return (
+    <div className="flex flex-col mx-0.5 md:mx-auto w-full md:w-fit py-5 items-center justify-center h-[calc(100vh-6rem)] bg-gradient-to-br from-primary to-secondary  text-white rounded-lg shadow-2xl outline-1 outline-white">
+      <h1 className=" text-2xl md:text-5xl my-4 text-shadow-xs text-shadow-black">
+        Welcome to <span className="text-gray-700 font-bold text-shadow-xs text-shadow-amber-50">Doggo Walker</span>{" "}
+      </h1>
+      <div className="grid grid-cols-1 items-center w-full h-full p-4 gap-4 sm:grid-cols-3 ">
+        <div className=" md:row-span-2 homePage-section bg-[url('/images/homePage2/forest.png')] ">
+          <h2 className="homePage-section-title "> Explore </h2>
+        </div>
+        <div className=" md:col-span-2 homePage-section bg-[url('/images/homePage2/goldensHug.png')]">
+          <h2 className="homePage-section-title"> Find new friends </h2>
+        </div>
+        <div className=" sm:col-span-2 sm:order-1 md:order-0 md:col-span-1 homePage-section bg-[url('/images/homePage2/peopleWalkingDogs.png')] ">
+          <h2 className="homePage-section-title"> Create community</h2>
+        </div>
+        <div className="md:row-span-2 homePage-section bg-[url('/images/homePage2/takeCare.png')]">
+          <h2 className="homePage-section-title"> Take care <span className="hidden sm:block">of your dog</span> </h2>
+        </div>
+        <div className=" md:col-span-2 homePage-section bg-[url('/images/homePage2/dogsPlaying.png')] ">
+          <h2 className="homePage-section-title hover:animate-bounce"> Let your dog play! </h2>
+        </div>
+      </div>
     </div>
-    );
+  );
 }
 export default HomePage;
