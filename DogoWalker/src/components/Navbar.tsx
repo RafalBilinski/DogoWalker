@@ -3,14 +3,27 @@
 import { Link, Outlet } from "react-router-dom";
 import DogoWalker from "../assets/dogo-Walker.svg?react";
 import { useEffect, useState } from "react";
-import React, { } from 'react';
+import React from "react";
 import { useAuth } from "./AuthContext"; // Import the AuthContext to access currentUser
 
+interface DropdownItem {
+  name: string;
+  path: string;
+  id: string;
+}
 
+interface NavbarItem {
+  name: string;
+  path: string;
+  onlyLoggedIn: boolean;
+  id: string;
+  dropdownItems?: DropdownItem[];
+}
 
 const Navigation: React.FC = () => {
   const { currentUser, signOutUser } = useAuth(); // Get currentUser directly from context
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   useEffect(() => {
     setIsUserLoggedIn(!!currentUser); // Convert to boolean using !!
@@ -20,11 +33,11 @@ const Navigation: React.FC = () => {
     try {
       await signOutUser(); // Use the context's signOutUser function
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     }
   };
 
-  const navbarItems = {
+  const navbarItems: Record<string, NavbarItem> = {
     home: {
       name: "Doggo Walker",
       path: "/",
@@ -45,36 +58,75 @@ const Navigation: React.FC = () => {
     },
     about: {
       name: "Menu",
-      path: "/about",
+      path: "/menu",
       onlyLoggedIn: true,
-      id: "navbar-btn-about",
+      id: "navbar-btn-Menu",
+      dropdownItems: [
+        {
+          name: "Profile",
+          path: "/profile",
+          id: "dropdown-profile",
+        },
+        {
+          name: "Settings",
+          path: "/settings",
+          id: "dropdown-settings",
+        },
+        {
+          name: "Friends",
+          path: "/friends",
+          id: "dropdown-friends",
+        },
+      ],
     },
   };
   console.log("Navbar render, user:", currentUser?.firebaseUser.displayName);
   return (
-    <div  id="site" className="flex flex-col w-screen bg-gray-600 ">
+    <div id="site" className="flex flex-col w-screen bg-gray-600 ">
       <nav className="w-fit overflow-visible px-5 self-center rounded-xl bg-neutral-100 border-b-0.5 border-gray-200 shadow-2xl sticky top-2 z-50 backdrop-blur-2xl">
         <div className="px-4  flex">
           <DogoWalker className=" h-10 w-10 sm:mr-4 my-1 self-center" />
           <div className="flex ">
             {Object.values(navbarItems).map(
-              (item) =>
-                item.onlyLoggedIn === isUserLoggedIn && (
+              item =>
+                item.onlyLoggedIn === isUserLoggedIn &&
+                (item.name === "Menu" ? (
+                  <>
+                    <button className="navbar-Button text-lg" key={item.id} id={item.id} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                      {item.name}
+                    </button>
+                    {isMenuOpen && (
+                      <div className="absolute right-0 mt-12 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                        <div className="py-1">
+                          {item.dropdownItems?.map(dropdownItem => (
+                            <Link
+                              key={dropdownItem.id}
+                              id={dropdownItem.id}
+                              to={dropdownItem.path}
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              {dropdownItem.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
                   <button key={item.id} className="navbar-Button">
-                    <Link
-                      to={item.path}
-                      id={item.id}
-                      className="text-lg font-semibold"
-                    >
+                    <Link to={item.path} id={item.id} className="text-lg font-semibold">
                       {item.name}
                     </Link>
                   </button>
-                )
+                ))
             )}
           </div>
           <div className="ml-auto items-center hidden sm:flex">
             {isUserLoggedIn ? (
-              <button className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 " onClick={signOutHandler}>
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 "
+                onClick={signOutHandler}
+              >
                 Logout
               </button>
             ) : (
@@ -88,7 +140,10 @@ const Navigation: React.FC = () => {
           </div>
         </div>
       </nav>
-      <div className="container flex mx:0 mx-auto px-0 md:px-4 py-6 h-[calc(100vh-3rem)]" id="content">
+      <div
+        className="container flex mx:0 mx-auto px-0 md:px-4 py-6 h-[calc(100vh-3rem)]"
+        id="content"
+      >
         <Outlet />
       </div>
     </div>

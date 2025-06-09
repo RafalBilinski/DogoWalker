@@ -4,14 +4,18 @@ export interface appUser {
   firebaseUser: User; // Firebase User object
   internalId: number;
   accountType: string; // Business or Personal
-  dogs?: [
+  dogs?: [  // Array of dogs owned by the user
     name: string, // Dog name
     id: string, // Dog ID
     photoUrl?: string, // Optional photo URL
     breed?: string, // Dog breed
     personality?: string, // Dog personality traits
     size?: number, // Dog size (e.g., small, medium, large)
-  ]; // Array of dog IDs or names
+  ]
+  lastPosition?:{
+    latitude: number; // Last known latitude
+    longitude: number; // Last known longitude
+  }; 
 }
 
 export type AuthContextType = {
@@ -19,6 +23,10 @@ export type AuthContextType = {
   handleLogin: (email: string, password: string) => Promise<void>;
   handleRegister: (email: string, password: string, name: string, surname: string, nickname?: string) => Promise<void>;
   signOutUser: () => Promise<void>;
+  getCurrentLocalization?: () => Promise<{
+    latitude: number;
+    longitude: number;
+  }>;
   error?: string | null;
   setError: (error: string | null) => void;
 };

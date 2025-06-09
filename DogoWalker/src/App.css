@@ -34,4 +34,5 @@
   .homePage-section-title:focus {
     @apply transition duration-600  cursor-pointer text-accent;
   }
+  
 }

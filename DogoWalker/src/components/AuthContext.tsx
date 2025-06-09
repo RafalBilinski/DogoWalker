@@ -7,6 +7,8 @@ import {
   updateProfile,
   signInWithEmailAndPassword
 } from "firebase/auth";
+import { collection, getDoc, doc, updateDoc} from "firebase/firestore";
+
 import { appUser, AuthContextType } from '../types/dataTypes';
 
 
@@ -17,7 +19,10 @@ export const AuthContext = createContext<AuthContextType>({
   handleRegister: async () => {},
   signOutUser: async () => {},
   error: null,
-  setError: () => {}
+  setError: () => {},
+  getCurrentLocalization: async () => {
+    return { latitude: 0, longitude: 0 };
+  }
 });
 
 export function useAuth() {
@@ -37,6 +42,8 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState<appUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+ 
+
 
 
   const handleLogin = async (email: string, password: string) => {
@@ -155,6 +162,3 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
-
-
-
