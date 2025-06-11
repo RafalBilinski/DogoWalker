@@ -1,16 +1,46 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth } from '../firebase-config'; // Ensure you have your Firebase auth initialized
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { auth, db } from "../firebase-config"; // Ensure you have your Firebase auth initialized
 import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   signOut,
   updateProfile,
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
+  User as FirebaseUser
 } from "firebase/auth";
-import { collection, getDoc, doc, updateDoc} from "firebase/firestore";
+import { collection, getDoc, doc, setDoc, updateDoc, getFirestore } from "firebase/firestore";
 
-import { appUser, AuthContextType } from '../types/dataTypes';
+import { appCurrentUser } from "../types/dataTypes";
 
+ type AuthContextType = {
+  currentUser: appCurrentUser | null;
+  handleLogin: (
+    email: string, 
+    password: string) 
+    => Promise<void>;
+
+  handleRegister: (
+    email: string,
+    password: string,
+    name: string,
+    surname: string,
+    phone: string,
+    accountType: string,
+    nickname?: string) 
+    => Promise<void>;
+
+  signOutUser: () 
+    => Promise<void>;
+
+  getCurrentLocalization?: () 
+    => Promise<{
+      latitude: number;
+      longitude: number;
+    }>;
+
+  error?: string | null;
+  setError: (error: string | null) => void;
+};
 
 // Create the context with an initial value matching the type
 export const AuthContext = createContext<AuthContextType>({
@@ -22,16 +52,15 @@ export const AuthContext = createContext<AuthContextType>({
   setError: () => {},
   getCurrentLocalization: async () => {
     return { latitude: 0, longitude: 0 };
-  }
+  },
 });
 
 export function useAuth() {
   return useContext(AuthContext);
 }
 
-
 export function loginWithGoogle() {
-  return auth.signInWithPopup(new auth.GoogleAuthProvider());   
+  return auth.signInWithPopup(new auth.GoogleAuthProvider());
 }
 
 export function loginWithEmail(email: string, password: string) {
@@ -39,38 +68,51 @@ export function loginWithEmail(email: string, password: string) {
 }
 
 export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState<appUser | null>(null);
+  const [currentUser, setCurrentUser] = useState<appCurrentUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
- 
 
+  const createUserDocument = async (userData: appCurrentUser, addedData: any) => {
+    const userRef = doc(db, "users", userData.firebaseUser.uid);
+    try {
+      await setDoc(userRef, {
+        ...userData,
+        createdAt: new Date(),
+        lastPosition: null,
+        friends: [],
+        status: "active",
+        ...addedData,
+      });
 
+      return userRef;
+    } catch (error) {
+      console.error("Error creating user document:", error);
+      throw error;
+    }
+  };
 
   const handleLogin = async (email: string, password: string) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
-      
+
       // Create appUser object
-      const appUserData: appUser = {
+      const appUserData: appCurrentUser = {
         firebaseUser: firebaseUser,
         internalId: Date.now(), // You might want to generate this differently
-        accountType: 'Personal', // Default value, adjust as needed
+        accountType: "Personal", // Default value, adjust as needed
       };
-      
+
       setCurrentUser(appUserData);
       console.log("User logged in successfully");
     } catch (err: any) {
       console.error("Login error:", err.code);
-       switch (err.code) {
+      switch (err.code) {
         case "auth/invalid-credential":
           setError("Incorrect password or e-mail. Please try again.");
           break;
         default:
-          setError(
-            "An unexpected error occurred. Please try again. Error code: " +
-              err.code
-          );
+          setError("An unexpected error occurred. Please try again. Error code: " + err.code);
           break;
       }
       throw error;
@@ -78,30 +120,40 @@ export function AuthProvider({ children }) {
   };
 
   const handleRegister = async (
-    email: string, 
-    password: string, 
-    name: string, 
-    surname: string, 
-    nickname?: string,
-    phone: string = ''
+    email: string,
+    password: string,
+    name: string,
+    surname: string,
+    phone?: string ,
+    accountType?: string , // Default to Personal if not provided
+    nickname?: string
   ) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const firebaseUser = userCredential.user;
-      
-      await updateProfile(firebaseUser, {
-        displayName: nickname || `${name} ${surname}`,
-        photoURL: '', // You can set a default photo URL or leave it empty
+      const firebaseCurrentUser = userCredential.user;
 
+      await updateProfile(firebaseCurrentUser, {
+        displayName: nickname || `${name} ${surname}`,
+        photoURL: "", // You can set a default photo URL or leave it empty
       });
 
       // Create appUser object
-      const appUserData: appUser = {
-        firebaseUser: firebaseUser,
+      const appUserData: appCurrentUser = {
+        firebaseUser: firebaseCurrentUser,
         internalId: Date.now(), // You might want to generate this differently
-        accountType: 'Personal', // Default value, adjust as needed
+        accountType: "Personal", // Default value, adjust as needed
       };
-      
+
+      // Create Firestore document
+      await createUserDocument(appUserData, {
+        email,
+        name,
+        surname,
+        nickname,
+        phone,
+        accountType: "Personal",
+      });
+
       setCurrentUser(appUserData);
       console.log("User created and profile updated successfully");
     } catch (err: any) {
@@ -132,10 +184,10 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, user => {
       if (user) {
-        const appUserData: appUser = {
+        const appUserData: appCurrentUser = {
           firebaseUser: user,
           internalId: Date.now(), // You might want to generate this differently
-          accountType: 'Personal', // Default value, adjust as needed
+          accountType: "Personal", // Default value, adjust as needed
         };
         setCurrentUser(appUserData);
       } else {
@@ -153,12 +205,8 @@ export function AuthProvider({ children }) {
     handleRegister,
     signOutUser,
     error,
-    setError
+    setError,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 }

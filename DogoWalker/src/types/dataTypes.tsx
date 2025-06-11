@@ -1,6 +1,6 @@
 import { User } from "firebase/auth";
 
-export interface appUser {
+export interface appCurrentUser {
   firebaseUser: User; // Firebase User object
   internalId: number;
   accountType: string; // Business or Personal
@@ -18,15 +18,3 @@ export interface appUser {
   }; 
 }
 
-export type AuthContextType = {
-  currentUser: appUser | null;
-  handleLogin: (email: string, password: string) => Promise<void>;
-  handleRegister: (email: string, password: string, name: string, surname: string, nickname?: string) => Promise<void>;
-  signOutUser: () => Promise<void>;
-  getCurrentLocalization?: () => Promise<{
-    latitude: number;
-    longitude: number;
-  }>;
-  error?: string | null;
-  setError: (error: string | null) => void;
-};

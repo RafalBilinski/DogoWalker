@@ -1,22 +1,33 @@
 @import "tailwindcss";
 
 @theme {
-  --color-secondary: #3b82f6; /* blue-500 */
   --color-primary: #06b6d4; /* cyan-500 */
+  --color-primary-light: #38bdf8; /* cyan-400 */
+  --color-primary-dark: #0891b2; /* cyan-600 */
+
+  --color-secondary: #3b82f6; /* blue-500 */
+  --color-secondary-light: #60a5fa; /* blue-400 */
+  --color-secondary-dark: #2563eb; /* blue-600 */
+
   --color-accent: #fbbf24;
-  --color-text-primary: white;
-  --color-text-secondary: #4a5565;
+  --color-font-primary: white;
+  --color-font-secondary: #4a5565;
+
+  --color-background-primary: #4a5565 ; /* gray-600 */
+  --color-background-primary-light: #6a7282; /* gray-500 */
+  --color-background-primary-dark: #364153; /* gray-700 */
 }
 
 @layer components {
   .navbar-Button {
-    @apply flex items-center px-2 py-1 text-gray-700;
+    @apply flex items-center px-2 py-2 text-gray-700;
     @apply transition shadow-none duration-1000;
   }
   .navbar-Button:hover {
     @apply text-black border-b-sky-500 border-b-2 bg-gray-100;
     @apply transition shadow-lg duration-300;
   }
+
   .homePage-section {
     @apply flex items-center justify-center w-full h-full bg-center bg-cover rounded-lg shadow-lg min-h-0 ;
     @apply transition  duration-1000 ;
@@ -34,5 +45,20 @@
   .homePage-section-title:focus {
     @apply transition duration-600  cursor-pointer text-accent;
   }
-  
+  .login-form-input {
+    @apply border p-2 w-full transition-colors duration-300;
+    @apply bg-none text-inherit;
+    @apply focus:bg-white focus:text-black;
+    @apply hover:bg-white hover:text-black;
+  }
+  .login-form-input-password {
+    @apply border flex w-full transition-colors duration-300;
+    @apply bg-none text-inherit;
+    @apply focus:bg-white focus:text-black;
+    @apply hover:bg-white hover:text-black;
+  }
+  .login-form-input-label {
+    @apply  text-sm font-medium;
+  }
+
 }

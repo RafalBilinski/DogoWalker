@@ -49,10 +49,8 @@ const Explore = () => {
             longitude: position.coords.longitude,
           };
           const localizationTreshold = 0.0000001; // Threshold for position update to avoid too frequent updates
-          if (newPosition.latitude - userPosition.latitude > localizationTreshold || 
-               newPosition.longitude - userPosition.longitude > localizationTreshold ||
-               newPosition.latitude - userPosition.latitude < -localizationTreshold || 
-               newPosition.longitude - userPosition.longitude < -localizationTreshold) {
+          if (Math.abs(newPosition.latitude - userPosition.latitude) > localizationTreshold || 
+               Math.abs(newPosition.longitude - userPosition.longitude) > localizationTreshold ) {
             console.log("Updating position:", newPosition);
             setPosition(newPosition);
           }
