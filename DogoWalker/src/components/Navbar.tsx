@@ -96,7 +96,7 @@ const Navigation: React.FC = () => {
           <li className="flex items-center">
             <DogoWalker className=" h-10 w-10 sm:mr-4 my-1" />
           </li>
-          <li className="flex">
+          <ul className="flex">
             {Object.values(navbarItems).map(
               item =>
                 item.onlyLoggedIn === isUserLoggedIn &&       //button only shown if user is logged in
@@ -134,7 +134,7 @@ const Navigation: React.FC = () => {
                   </li>
                 ))
             )}
-          </li>
+          </ul>
           <li className="ml-auto items-center hidden sm:flex">
             {isUserLoggedIn ? (
               <button

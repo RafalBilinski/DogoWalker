@@ -6,37 +6,34 @@ import {
   signOut,
   updateProfile,
   signInWithEmailAndPassword,
-  User as FirebaseUser
+
+  User as FirebaseUser,
 } from "firebase/auth";
 import { collection, getDoc, doc, setDoc, updateDoc, getFirestore } from "firebase/firestore";
 
 import { appCurrentUser } from "../types/dataTypes";
+import { Navigate } from "react-router-dom";
 
- type AuthContextType = {
+type AuthContextType = {
   currentUser: appCurrentUser | null;
-  handleLogin: (
-    email: string, 
-    password: string) 
-    => Promise<void>;
+  handleLogin: (email: string, password: string) => Promise<void>;
 
   handleRegister: (
     email: string,
     password: string,
     name: string,
-    surname: string,
+    lastName: string,
     phone: string,
     accountType: string,
-    nickname?: string) 
-    => Promise<void>;
+    nickname?: string
+  ) => Promise<void>;
 
-  signOutUser: () 
-    => Promise<void>;
+  signOutUser: () => Promise<void>;
 
-  getCurrentLocalization?: () 
-    => Promise<{
-      latitude: number;
-      longitude: number;
-    }>;
+  getCurrentLocalization?: () => Promise<{
+    latitude: number;
+    longitude: number;
+  }>;
 
   error?: string | null;
   setError: (error: string | null) => void;
@@ -72,39 +69,36 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const createUserDocument = async (userData: appCurrentUser, addedData: any) => {
-    const userRef = doc(db, "users", userData.firebaseUser.uid);
-    try {
-      await setDoc(userRef, {
-        ...userData,
-        createdAt: new Date(),
-        lastPosition: null,
-        friends: [],
-        status: "active",
-        ...addedData,
-      });
-
-      return userRef;
-    } catch (error) {
-      console.error("Error creating user document:", error);
-      throw error;
-    }
-  };
 
   const handleLogin = async (email: string, password: string) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
 
-      // Create appUser object
+      // Fetch additional user data from Firestore
+      const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+      
+      if (!userDoc.exists()) {
+        throw new Error("User data not found in Firestore");
+      }
+
+      const userData = userDoc.data();
+
+      // Create complete appUser object with Firestore data
       const appUserData: appCurrentUser = {
         firebaseUser: firebaseUser,
-        internalId: Date.now(), // You might want to generate this differently
-        accountType: "Personal", // Default value, adjust as needed
+        internalId: userData.internalId,
+        accountType: userData.accountType,
+        lastPosition: userData.lastPosition || null,
+        dogs: userData.dogs || [],
+        friends: userData.friends || [],
+        nickname: userData.nickname || `${userData.name} ${userData.lastName}`,
       };
 
       setCurrentUser(appUserData);
       console.log("User logged in successfully");
+      localStorage.setItem("userData", JSON.stringify(appUserData));
+
     } catch (err: any) {
       console.error("Login error:", err.code);
       switch (err.code) {
@@ -123,36 +117,50 @@ export function AuthProvider({ children }) {
     email: string,
     password: string,
     name: string,
-    surname: string,
-    phone?: string ,
-    accountType?: string , // Default to Personal if not provided
+    lastName: string,
+    phone: string,
+    accountType: string, 
     nickname?: string
   ) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseCurrentUser = userCredential.user;
 
+      // Update Firebase profile
       await updateProfile(firebaseCurrentUser, {
-        displayName: nickname || `${name} ${surname}`,
-        photoURL: "", // You can set a default photo URL or leave it empty
+        displayName: nickname || `${name} ${lastName}`,
       });
 
-      // Create appUser object
-      const appUserData: appCurrentUser = {
-        firebaseUser: firebaseCurrentUser,
-        internalId: Date.now(), // You might want to generate this differently
-        accountType: "Personal", // Default value, adjust as needed
+      // Create extended user data for Firestore
+      const userData = {
+        uid: firebaseCurrentUser.uid,
+        email: firebaseCurrentUser.email,
+        name,
+        lastName,
+        phone,
+        accountType,
+        nickname: nickname || `${name} ${lastName}`,
+        createdAt: new Date(),
+        lastPosition: null,
+        dogs: [],
+        friends: [],
+        status: "active",
+        internalId: Date.now(),
       };
 
-      // Create Firestore document
-      await createUserDocument(appUserData, {
-        email,
-        name,
-        surname,
-        nickname,
-        phone,
-        accountType: "Personal",
-      });
+      // Store in Firestore
+      await setDoc(doc(db, "users", firebaseCurrentUser.uid), userData);
+
+      // Create appUser object with all data
+      const appUserData: appCurrentUser = {
+        firebaseUser: firebaseCurrentUser,
+        internalId: userData.internalId,
+        accountType: userData.accountType,
+        lastPosition: {
+          latitude:0,
+          longitude: 0,
+        },        
+      };
 
       setCurrentUser(appUserData);
       console.log("User created and profile updated successfully");
@@ -173,11 +181,22 @@ export function AuthProvider({ children }) {
 
   const signOutUser = async () => {
     try {
+      // Clear Firebase auth
       await signOut(auth);
+
+      // Clear user state
       setCurrentUser(null);
+
+      // Clear any stored user data in localStorage if you're using it
+      localStorage.removeItem("userData");
+
+      // Clear any other user-related states you might have
+      setError(null);
+
       console.log("User signed out successfully");
     } catch (error) {
       console.error("Error signing out:", error);
+      setError("Failed to sign out. Please try again.");
     }
   };
 

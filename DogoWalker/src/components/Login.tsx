@@ -3,19 +3,21 @@ import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [surname, setSurname] = useState("");
+  const [lastName, setlastName] = useState("");
   const [nickname, setNickname] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(""); // Phone number can be null initially
   const [error, setError] = useState("");
   const [register, setRegister] = useState<Boolean>(false);
   const [showPassword, setShowPassword] = useState(false);
   const [accountType, setAccountType] = useState("personal"); // Default account type
-
+  const [userCountry, setUserCountry] = useState("pl"); // Default to Poland
   // Get auth context values
   const { currentUser, handleLogin, handleRegister } = useAuth();
   const navigate = useNavigate();
@@ -36,14 +38,14 @@ const Login: React.FC = () => {
       await handleLogin(email, password);
     } catch (err: any) {
       console.error("Login error:", err);
-      setError(err.message || "Login failed");
+      setError(err.message || "Invalid email or password.");
     }
   };
 
   const registerHandler = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await handleRegister(email, password, name, surname, phone, accountType, nickname);
+      await handleRegister(email, password, name, lastName, phone, accountType, nickname);
     } catch (err: any) {
       console.error("Register error:", err);
       setError(err.message || "Registration failed");
@@ -57,13 +59,38 @@ const Login: React.FC = () => {
     }
   }, [currentUser, navigate]);
 
+  // Clear error message after a short delay
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 10000); // Clear error after 10 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  // Get user's country code using the Geolocation API  TODO: move to backend
+  /*useEffect(() => {
+    fetch("https://ipapi.com/json/")
+      .then(response => response.json())
+      .then(data => {
+        setUserCountry(data.country_code.toLowerCase());
+        console.log("User country code:", data.country_code);
+      })
+      .catch(error => {
+        console.error("Error fetching location:", error);
+      });
+  }, []);*/
+
   return (
-    <div className="flex flex-col h-fit mx-0.5 md:mx-auto w-full max-w-[600px] 
+    <div
+      className="flex flex-col h-fit mx-0.5 md:mx-auto w-full max-w-[600px] 
     py-5 items-center justify-center bg-gradient-to-br from-primary to-secondary 
-    text-white rounded-lg shadow-2xl outline-1 outline-white min-w:0 min-h:0">
+    text-white rounded-lg shadow-2xl outline-1 outline-white min-w:0 min-h:0"
+    >
       <div
         id="login-register-container"
-        className={`mx-2 duration-500 transition-all sm:min-w-[350px] 
+        className={`mx-2 duration-700 transition-all sm:min-w-[350px] 
         ${register ? `opacity-100 h-auto ` : `opacity-0 h-0 overflow-hidden `} `}
       >
         <form
@@ -74,7 +101,7 @@ const Login: React.FC = () => {
 
           <div className="mb-4">
             <label htmlFor="register-email" className=" text-sm font-medium mb-1">
-              Email
+              Email*
             </label>
             <input
               id="register-email"
@@ -84,12 +111,14 @@ const Login: React.FC = () => {
               onChange={e => setEmail(e.target.value)}
               className="login-form-input"
               required
+              autoComplete="email"
+              autoFocus={!!register}
             />
           </div>
 
           <div className="mb-4">
             <label htmlFor="register-password" className="login-form-input-label">
-              Password
+              Password*
             </label>
             <div className="login-form-input-password">
               <input
@@ -101,7 +130,7 @@ const Login: React.FC = () => {
                 onChange={e => setPassword(e.target.value)}
                 className="w-full h-full p-2"
                 required
-                
+                autoComplete="new-password"
               />
               <span
                 className="flex items-center mx-0.5 cursor-pointer"
@@ -116,7 +145,7 @@ const Login: React.FC = () => {
 
           <div className="mb-4">
             <label htmlFor="register-name" className="text-sm font-medium mb-1">
-              Name
+              Name*
             </label>
             <input
               id="register-name"
@@ -130,53 +159,89 @@ const Login: React.FC = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="register-surname" className=" text-sm font-medium mb-1">
-              Surname
+            <label htmlFor="register-last-name" className=" text-sm font-medium mb-1">
+              Last name*
             </label>
             <input
-              id="register-surname"
+              id="register-last-name"
               type="text"
-              placeholder="Enter your surname"
-              value={surname}
-              onChange={e => setSurname(e.target.value)}
+              placeholder="Enter your last name"
+              value={lastName}
+              onChange={e => setlastName(e.target.value)}
               className="login-form-input"
               required
             />
           </div>
 
           <div className="mb-4">
-            <label htmlFor="register-nickname" className="text-sm font-medium mb-1">
-              Nickname (Optional)
+            <label htmlFor="register-account-type" className="text-sm font-medium mb-1">
+              Account Type*
             </label>
-            <input
-              id="register-nickname"
-              type="text"
-              placeholder="Enter your nickname"
-              value={nickname}
-              onChange={e => setNickname(e.target.value)}
-              className="login-form-input"
-            />
+            <div className="login-form-input">
+              <div className="flex items-center space-x-4">
+                <div>
+                  <input
+                    id="personal"
+                    type="radio"
+                    name="accountType"
+                    value="personal"
+                    checked={accountType === "personal"}
+                    onChange={e => setAccountType(e.target.value)}
+                    className="mr-2"
+                  />
+                  <label htmlFor="professional">Personal</label>
+                </div>
+                <div>
+                  <input
+                    id="business"
+                    type="radio"
+                    name="accountType"
+                    value="business"
+                    checked={accountType === "business"}
+                    onChange={e => setAccountType(e.target.value)}
+                    className="mr-2"
+                  />
+                  <label htmlFor="business">Business</label>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="mb-4">
+          <div className="mb-4 login-form-input">
             <label htmlFor="register-phone" className=" text-sm font-medium mb-1">
-              Phone Number
+              Phone Number*
             </label>
-            <input
-              id="register-phone"
-              type="tel"
-              placeholder="Enter your phone number"
+            <PhoneInput
+              country={userCountry} // default country - change to your preference
               value={phone}
-              onChange={e => setPhone(e.target.value)}
-              className="login-form-input"
-              required
+              onChange={value => setPhone(value)}
+              specialLabel=""
+              enableSearch={true}
+              inputStyle={{ background: "transparent" }}
+              dropdownStyle={{ background: "#6a7282" }}
+              buttonStyle={{ background: "transparent" }}
+              containerClass="w-full"
+              autocompleteSearch={true}
+              searchPlaceholder="Search for a country"
+              inputProps={{
+                id: "register-phone",
+                required: true,
+                autoComplete: "tel",
+                name: "phone",
+                "aria-label": "Phone number",
+              }}
             />
           </div>
-
-          {error && <p className="text-red-500">{error}</p>}
-          <button type="submit" className="bg-blue-500 text-white p-2 rounded">
-            Register
-          </button>
+          <div className="flex items-center justify-between">
+            <button type="submit" className="px-4 py-2 bg-secondary text-font-primary rounded hover:bg-secondary-dark transition-all duration-300 shadow-md">
+              Register
+            </button>
+            {error && (
+              <p className=" text-red-500 p-2 bg-white rounded-xs mx-2 max-w-[200px] animate-pulse">
+                {error}
+              </p>
+            )}
+          </div>
         </form>
         <div className="flex flex-col items-center my-2 mx-auto">
           <span className=" my-4 text-shadow-2xs text-shadow-black text-xl">
@@ -195,7 +260,7 @@ const Login: React.FC = () => {
 
       <div
         id="login-container"
-        className={`mx-2 duration-500 transition-all min-w-[300px] sm:min-w-[350px] 
+        className={`mx-2 duration-700 transition-all min-w-[300px] sm:min-w-[350px] 
         ${!register ? `opacity-100 h-auto ` : `opacity-0 h-0 overflow-hidden `} `}
       >
         <form
@@ -216,6 +281,8 @@ const Login: React.FC = () => {
               onChange={e => setEmail(e.target.value)}
               className="login-form-input"
               required
+              autoComplete="username"
+              autoFocus={!register}
             />
           </div>
 
@@ -223,15 +290,16 @@ const Login: React.FC = () => {
             <label htmlFor="login-password" className="text-sm font-medium mb-1">
               Password
             </label>
-            <div className="flex login-form-input">
+            <div className="login-form-input-password">
               <input
                 id="login-password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full"
+                className="w-full p-2 h-full"
                 required
+                autoComplete="current-password"
               />
               <span
                 className="flex items-center mx-0.5 cursor-pointer"
@@ -243,10 +311,16 @@ const Login: React.FC = () => {
               </span>
             </div>
           </div>
-          {error && <p className="text-red-500">{error}</p>}
-          <button type="submit" className="bg-blue-500 text-white p-2 rounded">
-            Login
-          </button>
+          <div className="flex items-center justify-between">
+            <button type="submit" className="px-4 py-2 bg-secondary text-font-primary rounded hover:bg-secondary-dark transition-all duration-300 shadow-md">
+              Login
+            </button>
+            {error && (
+              <p className=" text-red-500 p-2 bg-white rounded-xs mx-2 max-w-[200px] animate-pulse">
+                {error}
+              </p>
+            )}
+          </div>
         </form>
         <div className="flex flex-col items-center my-2 mx-auto">
           <span className=" my-4 text-shadow-2xs text-shadow-black text-xl">
