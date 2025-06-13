@@ -60,5 +60,15 @@
   .login-form-input-label {
     @apply  text-sm font-medium;
   }
+    .profile-form-input {
+    @apply border p-2 w-full transition-colors duration-300;
+    @apply bg-none text-inherit touch-none;
+    @apply focus:bg-white focus:text-black;
+    @apply hover:bg-white hover:text-black;
+    @apply touch-pan-x touch-pan-y;
+    @apply active:shadow-inner;
+    @apply active:scale-[0.99];
+    @apply active:bg-white active:text-black;
+  }
 
 }

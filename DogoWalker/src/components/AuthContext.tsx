@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../firebase-config"; // Ensure you have your Firebase auth initialized
 import {
   onAuthStateChanged,
@@ -6,13 +6,9 @@ import {
   signOut,
   updateProfile,
   signInWithEmailAndPassword,
-
-  User as FirebaseUser,
 } from "firebase/auth";
-import { collection, getDoc, doc, setDoc, updateDoc, getFirestore } from "firebase/firestore";
-
+import { getDoc, doc, setDoc, updateDoc } from "firebase/firestore";
 import { appCurrentUser } from "../types/dataTypes";
-import { Navigate } from "react-router-dom";
 
 type AuthContextType = {
   currentUser: appCurrentUser | null;
@@ -37,6 +33,17 @@ type AuthContextType = {
 
   error?: string | null;
   setError: (error: string | null) => void;
+
+  handleProfileUpdate: (updates: {
+    newDisplayName?: string;
+    lastPosition?: {
+      latitude: number;
+      longitude: number;
+    };
+    newAge?: number;
+    newBio?: string;
+    newEmail?: string;
+  }) => Promise<void>;
 };
 
 // Create the context with an initial value matching the type
@@ -50,15 +57,13 @@ export const AuthContext = createContext<AuthContextType>({
   getCurrentLocalization: async () => {
     return { latitude: 0, longitude: 0 };
   },
+  handleProfileUpdate: async () => {},
 });
 
 export function useAuth() {
   return useContext(AuthContext);
 }
 
-export function loginWithGoogle() {
-  return auth.signInWithPopup(new auth.GoogleAuthProvider());
-}
 
 export function loginWithEmail(email: string, password: string) {
   return signInWithEmailAndPassword(auth, email, password);
@@ -69,7 +74,6 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-
   const handleLogin = async (email: string, password: string) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -77,7 +81,7 @@ export function AuthProvider({ children }) {
 
       // Fetch additional user data from Firestore
       const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-      
+
       if (!userDoc.exists()) {
         throw new Error("User data not found in Firestore");
       }
@@ -98,18 +102,18 @@ export function AuthProvider({ children }) {
       setCurrentUser(appUserData);
       console.log("User logged in successfully");
       localStorage.setItem("userData", JSON.stringify(appUserData));
-
     } catch (err: any) {
-      console.error("Login error:", err.code);
+      console.error("Auth login error:", err.code);
       switch (err.code) {
         case "auth/invalid-credential":
-          setError("Incorrect password or e-mail. Please try again.");
-          break;
+          throw new Error("Incorrect password or e-mail. Please try again.");
+        case "auth/too-many-requests":
+          throw new Error("Too many login attempts. Please try again later.");
         default:
-          setError("An unexpected error occurred. Please try again. Error code: " + err.code);
-          break;
+          throw new Error(
+            "An unexpected error occurred. Please try again. Error code: " + err.code
+          );
       }
-      throw error;
     }
   };
 
@@ -119,7 +123,7 @@ export function AuthProvider({ children }) {
     name: string,
     lastName: string,
     phone: string,
-    accountType: string, 
+    accountType: string,
     nickname?: string
   ) => {
     try {
@@ -157,9 +161,9 @@ export function AuthProvider({ children }) {
         internalId: userData.internalId,
         accountType: userData.accountType,
         lastPosition: {
-          latitude:0,
+          latitude: 0,
           longitude: 0,
-        },        
+        },
       };
 
       setCurrentUser(appUserData);
@@ -179,6 +183,75 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const handleProfileUpdate = async (updates: {
+    newDisplayName?: string;
+    lastPosition?: {
+      latitude: number;
+      longitude: number;
+    };
+    newAge?: number;
+    newBio?: string;
+    newEmail?: string;
+  }) => {
+    try {
+      if (!currentUser?.firebaseUser) {
+        throw new Error("No user is currently logged in");
+      }
+
+      const userRef = doc(db, "users", currentUser.firebaseUser.uid);
+      const updates_to_apply: any = {};
+
+      // Handle display name update
+      if (updates.newDisplayName) {
+        await updateProfile(currentUser.firebaseUser, {
+          displayName: updates.newDisplayName,
+        });
+        updates_to_apply.nickname = updates.newDisplayName;
+      }
+
+      // Handle position update
+      if (updates.lastPosition) {
+        updates_to_apply.lastPosition = updates.lastPosition;
+      }
+      // Handle age update
+      if (updates.newAge !== undefined) {
+        updates_to_apply.age = updates.newAge;
+      }
+      // Handle bio update
+      if (updates.newBio) {
+        updates_to_apply.bio = updates.newBio;
+      }
+
+      console.log('updates_to_apply before Firestore:', updates_to_apply);
+      // Update Firestore if we have any updates
+      if (Object.keys(updates_to_apply).length > 0) {
+        await updateDoc(userRef, updates_to_apply).catch(err => {
+          console.error("Firestore update error:", err);
+          throw new Error("Failed to update profile in Firestore: " + err.message);
+        });
+
+        // Update local state
+        setCurrentUser(prev => {
+          if (!prev) {
+            console.log("No previous user state found to update");
+            return null;
+          }
+          const updated = {
+            ...prev,
+            ...updates_to_apply
+          };
+          console.log('Updated user state:', updated);
+          return updated;
+        });
+      }
+      console.log("Profile updated successfully");
+
+    } catch (err: any) {
+      console.error("Profile update error:", err);
+      throw new Error("Failed to update profile: " + err.message);
+    }
+  };
+
   const signOutUser = async () => {
     try {
       // Clear Firebase auth
@@ -188,15 +261,12 @@ export function AuthProvider({ children }) {
       setCurrentUser(null);
 
       // Clear any stored user data in localStorage if you're using it
-      localStorage.removeItem("userData");
-
-      // Clear any other user-related states you might have
-      setError(null);
+      localStorage.clear();
 
       console.log("User signed out successfully");
     } catch (error) {
       console.error("Error signing out:", error);
-      setError("Failed to sign out. Please try again.");
+      throw new Error("Failed to sign out. Please try again.");
     }
   };
 
@@ -225,6 +295,7 @@ export function AuthProvider({ children }) {
     signOutUser,
     error,
     setError,
+    handleProfileUpdate,
   };
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;

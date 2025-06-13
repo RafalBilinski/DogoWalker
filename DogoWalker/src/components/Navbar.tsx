@@ -1,10 +1,10 @@
 /// <reference types="vite-plugin-svgr/client" />
-
 import { Link, Outlet } from "react-router-dom";
 import DogoWalker from "../assets/dogo-Walker.svg?react";
 import { useEffect, useState } from "react";
 import React from "react";
 import { useAuth } from "./AuthContext"; // Import the AuthContext to access currentUser
+import MenuIcon from '@mui/icons-material/Menu';
 
 interface DropdownItem {
   name: string;
@@ -53,7 +53,7 @@ const Navigation: React.FC = () => {
     },
     contact: {
       name: "Contact",
-      path: "/contact",
+      path: "/",
       onlyLoggedIn: false,
       id: "navbar-btn-contact",
     },
@@ -76,12 +76,12 @@ const Navigation: React.FC = () => {
         },
         {
           name: "Settings",
-          path: "/settings",
+          path: "/",
           id: "dropdown-settings",
         },
         {
           name: "Friends",
-          path: "/friends",
+          path: "/",
           id: "dropdown-friends",
         },
       ],
@@ -104,11 +104,12 @@ const Navigation: React.FC = () => {
                   <ul className=" flex items-center h-full" key={item.id}>
                     <button className="navbar-Button text-lg" id={item.id} onClick={() => setIsMenuOpen(!isMenuOpen)}>
                       {item.name}
+                      <MenuIcon className="ml-2 hidden xl:block" />
                     </button>
                     {isMenuOpen && (
                       <div onMouseLeave={()=>setIsMenuOpen(false)} 
                       onMouseUp={handleMenuToggle}
-                      className="absolute right-0 top-0 pt-12 w-48 transition-all duration-1000 ease-in-out">
+                      className="absolute right-0 top-0 pt-12 w-48 transition-all duration-1000 ease-in-out z-50">
                         <div className="py-1 bg-white rounded-md shadow-lg  ring-1 ring-black ring-opacity-5">
                           {item.dropdownItems?.map(dropdownItem => (
                             <Link

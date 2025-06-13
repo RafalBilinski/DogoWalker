@@ -5,6 +5,7 @@ import HomePage2 from './components/InternalHomePage';
 import Navbar from './components/Navbar';
 import Login from './components/Login';
 import Explore from './components/Explore';
+import Profile from './components/Profile';
 import { AuthProvider } from './components/AuthContext';
 
 
@@ -21,6 +22,7 @@ function App() {
             <Route path="/home2" element={<HomePage2 />} />
             <Route path="/login" element={<Login />} />
             <Route path="/explore" element={<Explore />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
         </Routes>
       </BrowserRouter>

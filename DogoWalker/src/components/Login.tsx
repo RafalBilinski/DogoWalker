@@ -37,8 +37,10 @@ const Login: React.FC = () => {
     try {
       await handleLogin(email, password);
     } catch (err: any) {
-      console.error("Login error:", err);
-      setError(err.message || "Invalid email or password.");
+      const stringErr = String(err);
+      console.error("Login error:", stringErr);
+      setError(stringErr || "Invalid email or password.");
+      console.log("Error details passed to state:", error);
     }
   };
 
@@ -90,12 +92,12 @@ const Login: React.FC = () => {
     >
       <div
         id="login-register-container"
-        className={`mx-2 duration-700 transition-all sm:min-w-[350px] 
-        ${register ? `opacity-100 h-auto ` : `opacity-0 h-0 overflow-hidden `} `}
+        className={`mx-2 duration-700 transition-all sm:min-w-[350px] overflow-hidden
+        ${register ? `opacity-100 h-auto ` : `opacity-0 h-0  `} `}
       >
         <form
           onSubmit={registerHandler}
-          className="bg-gray-500 p-6 rounded shadow-md max-w-[400px] w-full"
+          className="bg-gray-500 p-6 rounded shadow-md max-w-[400px] "
         >
           <h2 className="text-2xl mb-4">Register</h2>
 
@@ -217,7 +219,7 @@ const Login: React.FC = () => {
               onChange={value => setPhone(value)}
               specialLabel=""
               enableSearch={true}
-              inputStyle={{ background: "transparent" }}
+              inputStyle={{ background: "transparent", width: "100%",  }}
               dropdownStyle={{ background: "#6a7282" }}
               buttonStyle={{ background: "transparent" }}
               containerClass="w-full"
@@ -265,7 +267,7 @@ const Login: React.FC = () => {
       >
         <form
           onSubmit={loginHandler}
-          className="mx-2 bg-gray-500 p-6 rounded shadow-md max-w-[400px] w-full"
+          className="mx-2 bg-gray-500 p-6 rounded shadow-md max-w-[400px] "
         >
           <h2 className="text-2xl mb-4">Login</h2>
 

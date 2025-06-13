@@ -15,7 +15,7 @@ interface RecenterProps {
 
 
 const Explore = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, handleProfileUpdate } = useAuth();
   const navigate = useNavigate();
   const defaultPosition: Position = {latitude: 52.237049, longitude: 21.017532}; // Warsaw coordinates
   const [userPosition, setPosition]= useState<Position>(defaultPosition); // Warsaw coordinates
@@ -40,7 +40,7 @@ const Explore = () => {
     }
   }, []);
 
-  const updatePosition = () => {
+  const updatePosition = async () => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -53,6 +53,14 @@ const Explore = () => {
                Math.abs(newPosition.longitude - userPosition.longitude) > localizationTreshold ) {
             console.log("Updating position:", newPosition);
             setPosition(newPosition);
+            handleProfileUpdate({ lastPosition: newPosition })
+              .then(() => {
+                console.log("Position updated successfully");
+              })
+              .catch((error) => {
+                console.error("Error updating position:", error);
+                alert("Failed to update your position. Please try again.");
+              });
           }
           
           
@@ -69,7 +77,7 @@ const Explore = () => {
 
   console.log("userPosition:", userPosition, "currentUser:", );
   return (
-    <div className="flex mx-0.5 md:mx-auto w-screen py-5 items-center justify-center h-[calc(100vh-6rem)] bg-gradient-to-br from-primary to-secondary text-white rounded-lg shadow-2xl outline-1 outline-white">
+    <div className="flex mx-0.5 md:mx-auto w-screen py-5 items-center justify-center h-[calc(100vh-6rem)] bg-gradient-to-br from-primary to-secondary text-white rounded-lg shadow-2xl outline-1 outline-white z-10">
       <div id="map" className="flex w-full h-full p-4 " onClick={updatePosition}>
         <MapContainer
           center={[defaultPosition.latitude, defaultPosition.longitude]}
