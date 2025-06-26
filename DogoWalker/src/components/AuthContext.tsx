@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth, db } from "../firebase-config"; // Ensure you have your Firebase auth initialized
+import { auth, db, storage } from "../firebase-config"; // Ensure you have your Firebase auth initialized
 import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
@@ -8,7 +8,9 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { getDoc, doc, setDoc, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { appCurrentUser } from "../types/dataTypes";
+import { SupportedPhotoFileFormat } from "../types/fileTypes";
 
 type AuthContextType = {
   currentUser: appCurrentUser | null;
@@ -34,6 +36,8 @@ type AuthContextType = {
   error?: string | null;
   setError: (error: string | null) => void;
 
+  handlePhotoUpdates: (updates: { profilePhoto?: File | undefined }) => Promise<void>;
+
   handleProfileUpdate: (updates: {
     newDisplayName?: string;
     lastPosition?: {
@@ -43,9 +47,25 @@ type AuthContextType = {
     newAge?: number;
     newBio?: string;
     newEmail?: string;
+    photoURL?: string | null | undefined;
+    photo?: File | undefined;
   }) => Promise<void>;
 };
 
+type dog = {
+  id: string;
+  name: string;
+  atitude?: number;
+  age?: number;
+  breed?: string;
+  createdAt?: Date;
+  gender?: number;
+  ownerId?: string;
+  photoURL?: string;
+  photo?: File | undefined;
+  bio?: string;
+  size?: number;
+};
 // Create the context with an initial value matching the type
 export const AuthContext = createContext<AuthContextType>({
   currentUser: null,
@@ -58,12 +78,12 @@ export const AuthContext = createContext<AuthContextType>({
     return { latitude: 0, longitude: 0 };
   },
   handleProfileUpdate: async () => {},
+  handlePhotoUpdates: async () => {},
 });
 
 export function useAuth() {
   return useContext(AuthContext);
 }
-
 
 export function loginWithEmail(email: string, password: string) {
   return signInWithEmailAndPassword(auth, email, password);
@@ -80,19 +100,21 @@ export function AuthProvider({ children }) {
       const firebaseUser = userCredential.user;
 
       // Fetch additional user data from Firestore
-      const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+      const userProfileDoc = await getDoc(doc(db, "users", firebaseUser.uid));
 
-      if (!userDoc.exists()) {
+      if (!userProfileDoc.exists()) {
+        setError("User data not found in Firestore");
         throw new Error("User data not found in Firestore");
       }
 
-      const userData = userDoc.data();
+      const userData = userProfileDoc.data();
 
       // Create complete appUser object with Firestore data
       const appUserData: appCurrentUser = {
         firebaseUser: firebaseUser,
         internalId: userData.internalId,
         accountType: userData.accountType,
+        bio: userData.bio || "",
         lastPosition: userData.lastPosition || null,
         dogs: userData.dogs || [],
         friends: userData.friends || [],
@@ -104,6 +126,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem("userData", JSON.stringify(appUserData));
     } catch (err: any) {
       console.error("Auth login error:", err.code);
+      setError(`Auth login error:  ${err.code}`);
       switch (err.code) {
         case "auth/invalid-credential":
           throw new Error("Incorrect password or e-mail. Please try again.");
@@ -139,7 +162,8 @@ export function AuthProvider({ children }) {
       const userData = {
         uid: firebaseCurrentUser.uid,
         email: firebaseCurrentUser.email,
-        name,
+        bio: "",
+        age: null,
         lastName,
         phone,
         accountType,
@@ -152,8 +176,12 @@ export function AuthProvider({ children }) {
         internalId: Date.now(),
       };
 
-      // Store in Firestore
+      // Profile store in Firestore
       await setDoc(doc(db, "users", firebaseCurrentUser.uid), userData);
+      // Initialize dogs collection for the user
+      if (accountType === "personal") {
+        await setDoc(doc(db, "dogs", firebaseCurrentUser.uid), {});
+      }
 
       // Create appUser object with all data
       const appUserData: appCurrentUser = {
@@ -170,6 +198,7 @@ export function AuthProvider({ children }) {
       console.log("User created and profile updated successfully");
     } catch (err: any) {
       console.error("Registration error: ", err.code);
+      setError(`Registration error:   ${err.code}`);
       switch (err.code) {
         case "auth/email-already-in-use":
           throw new Error("Email already in use. Please try another one.");
@@ -183,6 +212,121 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const handlePhotoUpdates = async (updates: { profilePhoto?: File | undefined }) => {
+    if (currentUser) {
+      function extractFileFormat(photoURL) {
+        if (!photoURL) return null;
+
+        // Decode URL if encoded
+        const decodedURL = decodeURIComponent(photoURL);
+
+        // Regex do to find file format
+        const formatRegex = /\.([a-zA-Z0-9]+)(?:\?|#|$)/i;
+        const match = decodedURL.match(formatRegex);
+
+        if (match) {
+          const format = match[1].toLowerCase();
+          return SupportedPhotoFileFormat.includes(format)
+            ? format
+            : setError(`Supported format must have changed, unsupotred format: ${format}`);
+        }
+        setError(`format not found from URL`);
+        return new Error("format not found from URL");
+      }
+
+      function convertImage(imageFile, maxWidth = 800, maxHeight = 600, quality = 0.9) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          
+          img.onload = function() {
+            // Oblicz nowe wymiary zachowując proporcje
+            let { width, height } = img;
+            
+            // Sprawdź, który wymiar przekracza limit
+            if (width > height) {
+              if (width > maxWidth) {
+                height = height * (maxWidth / width);
+                width = maxWidth;
+              }
+            } else {
+              if (height > maxHeight) {
+                width = width * (maxHeight / height);
+                height = maxHeight;
+              }
+            }
+            
+            // Utwórz canvas i narysuj przeskalowany obraz
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Narysuj obraz na canvas
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Konwertuj do JPEG blob
+            canvas.toBlob((blob) => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                reject(new Error('Błąd konwersji obrazu'));
+              }
+            }, 'image/jpeg', quality);
+          };
+          
+          img.onerror = () => reject(new Error('Błąd ładowania obrazu'));
+          
+          // Załaduj obraz
+          if (imageFile instanceof File) {
+            const reader = new FileReader();
+            reader.onload = (e) => img.src = e.target.result;
+            reader.readAsDataURL(imageFile);
+          } else {
+            img.src = imageFile; // URL lub base64
+          }
+        });
+      }
+
+      if (updates.profilePhoto) {
+        const profileStoragePatchFormat = `/users/${currentUser.firebaseUser.uid}/profilePhoto`;
+        const newProfilePhotoRef = ref(
+          storage,
+          `${profileStoragePatchFormat}/${updates.profilePhoto.name}`
+        );
+        let oldPhotoURL = "";
+        if(currentUser.firebaseUser.photoURL) {
+          oldPhotoURL = currentUser.firebaseUser.photoURL;
+        }
+
+        try {
+          await uploadBytes(newProfilePhotoRef, updates.profilePhoto);          
+          const newPhotoURL = await getDownloadURL(newProfilePhotoRef);
+          await updateProfile(currentUser.firebaseUser, {
+            photoURL: newPhotoURL,
+          });         
+        } catch (err) {
+          console.log(err);
+          setError(err);
+          throw new Error("Error sending file: ", err);
+        }        
+
+        if (oldPhotoURL) {    //this approach ensures the user will have updated profile photo but in case of error, old file should be deleted manually
+          const oldPhotoFormat = extractFileFormat(currentUser.firebaseUser.photoURL);
+          console.log("Auth: old file type: ", oldPhotoFormat);
+          const oldPhotoFileName = `${currentUser.firebaseUser.uid}${oldPhotoFormat}`;
+          const oldPhotoRef = ref(storage, `${profileStoragePatchFormat}/${oldPhotoFileName}`);
+          try {
+            await deleteObject(oldPhotoRef);
+          } catch (err) {
+            setError(err);
+            console.log("current photo URL: ", currentUser.firebaseUser.photoURL);
+            throw new Error("deletion error  ", err);
+          }
+        }
+      }
+    }
+  };
+
   const handleProfileUpdate = async (updates: {
     newDisplayName?: string;
     lastPosition?: {
@@ -192,6 +336,7 @@ export function AuthProvider({ children }) {
     newAge?: number;
     newBio?: string;
     newEmail?: string;
+    photo?: File | undefined;
   }) => {
     try {
       if (!currentUser?.firebaseUser) {
@@ -206,7 +351,6 @@ export function AuthProvider({ children }) {
         await updateProfile(currentUser.firebaseUser, {
           displayName: updates.newDisplayName,
         });
-        updates_to_apply.nickname = updates.newDisplayName;
       }
 
       // Handle position update
@@ -222,7 +366,7 @@ export function AuthProvider({ children }) {
         updates_to_apply.bio = updates.newBio;
       }
 
-      console.log('updates_to_apply before Firestore:', updates_to_apply);
+      console.log("updates_to_apply before Firestore:", updates_to_apply);
       // Update Firestore if we have any updates
       if (Object.keys(updates_to_apply).length > 0) {
         await updateDoc(userRef, updates_to_apply).catch(err => {
@@ -238,15 +382,15 @@ export function AuthProvider({ children }) {
           }
           const updated = {
             ...prev,
-            ...updates_to_apply
+            ...updates_to_apply,
           };
-          console.log('Updated user state:', updated);
+          console.log("Updated user state:", updated);
           return updated;
         });
       }
       console.log("Profile updated successfully");
-
     } catch (err: any) {
+      setError(`Profile update error: ${err}`)
       console.error("Profile update error:", err);
       throw new Error("Failed to update profile: " + err.message);
     }
@@ -290,6 +434,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     currentUser,
+    handlePhotoUpdates,
     handleLogin,
     handleRegister,
     signOutUser,
@@ -297,6 +442,7 @@ export function AuthProvider({ children }) {
     setError,
     handleProfileUpdate,
   };
+  
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 }

@@ -3,7 +3,7 @@ import { Link, Outlet } from "react-router-dom";
 import DogoWalker from "../assets/dogo-Walker.svg?react";
 import { useEffect, useState } from "react";
 import React from "react";
-import { useAuth } from "./AuthContext"; // Import the AuthContext to access currentUser
+import { useAuth, } from "./AuthContext"; // Import the AuthContext to access currentUser
 import MenuIcon from '@mui/icons-material/Menu';
 
 interface DropdownItem {
@@ -21,19 +21,20 @@ interface NavbarItem {
 }
 
 const Navigation: React.FC = () => {
-  const { currentUser, signOutUser } = useAuth(); // Get currentUser directly from context
+  const { currentUser, signOutUser, error } = useAuth(); // Get currentUser directly from context
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   useEffect(() => {
+    console.error(`last error: ${error}`)
     setIsUserLoggedIn(!!currentUser); // Convert to boolean using !!
   }, [currentUser]); // This will run whenever currentUser changes in the context
 
   const signOutHandler = async () => {
     try {
       await signOutUser(); // Use the context's signOutUser function
-    } catch (error) {
-      console.error("Logout failed:", error);
+    } catch (err) {
+      console.error("Logout failed:", err);
     }
   };
 
@@ -90,7 +91,7 @@ const Navigation: React.FC = () => {
   console.log("Navbar render, user:", currentUser?.firebaseUser.displayName);
   return (
     <div id="site" className="flex flex-col w-screen bg-background-primary ">
-      <nav className="w-fit overflow-visible px-5 self-center 
+      <nav className="w-fit overflow-visible sm:px-5 sm:py-1 self-center 
       rounded-xl bg-neutral-200 border-b-0.5 border-gray-200 shadow-2xl sticky top-2 z-50 backdrop-blur-2xl">
         <ul className="px-4 flex">
           <li className="flex items-center">
@@ -102,15 +103,15 @@ const Navigation: React.FC = () => {
                 item.onlyLoggedIn === isUserLoggedIn &&       //button only shown if user is logged in
                 (item.name === "Menu" ? (                     // Dropdown menu for "Menu" item
                   <ul className=" flex items-center h-full" key={item.id}>
-                    <button className="navbar-Button text-lg" id={item.id} onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                      {item.name}
-                      <MenuIcon className="ml-2 hidden xl:block" />
+                    <button className="navbar-Button text-lg h-full" id={item.id} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                      <span style={{ display: window.innerWidth <= 400 ? 'none' : 'block' }}>{item.name}</span>
+                      <MenuIcon className="mx-5 " />
                     </button>
                     {isMenuOpen && (
                       <div onMouseLeave={()=>setIsMenuOpen(false)} 
                       onMouseUp={handleMenuToggle}
                       className="absolute right-0 top-0 pt-12 w-48 transition-all duration-1000 ease-in-out z-50">
-                        <div className="py-1 bg-white rounded-md shadow-lg  ring-1 ring-black ring-opacity-5">
+                        <div className="py-1 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
                           {item.dropdownItems?.map(dropdownItem => (
                             <Link
                               key={dropdownItem.id}
@@ -136,7 +137,7 @@ const Navigation: React.FC = () => {
                 ))
             )}
           </ul>
-          <li className="ml-auto items-center hidden sm:flex">
+          <li className="ml-auto items-center flex">
             {isUserLoggedIn ? (
               <button
                 className="px-4 py-2 bg-secondary text-font-primary rounded hover:bg-secondary-dark transition-all duration-300"

@@ -2,10 +2,11 @@ import React, { use, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 import { EditableField } from "./UIElements/EditableField";
+import { EditablePhoto } from "./UIElements/EditablePhoto";
 import AddAPhoto from "@mui/icons-material/AddAPhoto" // Ensure you have ionicons installed if you're using icons
 
 const Profile: React.FC = () => {
-  const { currentUser, handleLogin, handleProfileUpdate } = useAuth(); // Get auth context values
+  const { currentUser, handlePhotoUpdates, handleProfileUpdate } = useAuth(); // Get auth context values
   const [bio, setBio] = useState(currentUser?.bio || ""); // Bio can be null initially
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -68,18 +69,11 @@ const Profile: React.FC = () => {
           <h2 className="text-2xl mb-4 col-span-2">
             Your Profile
           </h2>
-          <div id="user-photo-container"  className=" flex justify-center aspect-square min-h-24 min-w-24 max-h-30 max-w-30 mx-auto sm:row-span-2 sm:w-full mb-4">
-            {currentUser?.firebaseUser.photoURL ? (
-              <img 
-                src={currentUser.firebaseUser.photoURL}
-                alt={`${currentUser.firebaseUser.displayName || "User"}'s profile`}
-                className="w-24 h-24 rounded-full object-cover mb-4"
-              />
-            ) : (
-              <div className="aspect-square  w-full p-10 rounded-full bg-gray-300 flex items-center justify-center ">
-                <AddAPhoto className="text-gray-500"  />
-              </div>
-            )}
+          <div id="user-photo-container"  className=" flex justify-center aspect-square min-h-24 min-w-24 max-h-36 max-w-36 mx-auto sm:row-span-2 sm:w-full mb-4">
+            <EditablePhoto
+              id="user-photo"
+              onSave={(newPhotoFile) => handlePhotoUpdates({ profilePhoto: newPhotoFile })}
+            />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div className="mb-4 profile-form-input">

@@ -1,23 +1,19 @@
-import './App.css'
+import "./App.tailwind.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import HomePage from './components/HomePage';
-import HomePage2 from './components/InternalHomePage';
-import Navbar from './components/Navbar';
-import Login from './components/Login';
-import Explore from './components/Explore';
-import Profile from './components/Profile';
-import { AuthProvider } from './components/AuthContext';
+import HomePage from "./components/HomePage";
+import HomePage2 from "./components/InternalHomePage";
+import Navbar from "./components/Navigation";
+import Login from "./components/Login";
+import Explore from "./components/Explore";
+import Profile from "./components/Profile";
+import { AuthProvider } from "./components/AuthContext";
 
-
-
-
-
-function App() {          
+function App() {
   return (
     <AuthProvider>
-      <BrowserRouter> 
+      <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navbar />} >
+          <Route path="/" element={<Navbar />}>
             <Route index element={<HomePage />} />
             <Route path="/home2" element={<HomePage2 />} />
             <Route path="/login" element={<Login />} />
@@ -27,7 +23,7 @@ function App() {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
-  )
+  );
 }
 
-export default App
+export default App;
