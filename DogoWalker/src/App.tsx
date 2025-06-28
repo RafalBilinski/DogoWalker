@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./components/HomePage";
 import HomePage2 from "./components/InternalHomePage";
 import Navbar from "./components/Navigation";
+import Layout from "./components/Layout";
 import Login from "./components/Login";
 import Explore from "./components/Explore";
 import Profile from "./components/Profile";
@@ -13,7 +14,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navbar />}>
+          <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
             <Route path="/home2" element={<HomePage2 />} />
             <Route path="/login" element={<Login />} />

@@ -18,8 +18,8 @@ export const EditablePhoto: React.FC<EditablePhotoProps> = ({
   onSave,
   containerClassName = "flex flex-col justify-center aspect-square place-items-center ",
   inputClassName = "profile-form-input mb-2",
-  photoClassName = "w-full h-full object-cover rounded-full cursor-pointer hover:bg-gray-100 p-1 rounded border-b border-transparent",
-  buttonCalssName = "  ",
+  photoClassName = "w-full aspect-square object-cover rounded-full cursor-pointer hover:bg-gray-100 p-1 rounded border-b border-transparent",
+  buttonCalssName = "profile-form-input  ",
 }) => {
   const { currentUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
@@ -43,7 +43,7 @@ export const EditablePhoto: React.FC<EditablePhotoProps> = ({
     const file = e.target.files[0];
     if (!file) return;
     setCurrentFile(file);
-    let fileName: string = `${currentUser?.firebaseUser.uid}`;
+    let fileName: string = `userProfile`;
 
     function convertFileTypeToExtension(fileType): string {
       // Regex to extract part after 'image/'
@@ -74,7 +74,7 @@ export const EditablePhoto: React.FC<EditablePhotoProps> = ({
   return (
     <div id={id} className={containerClassName}>
       {isEditing ? (
-        <form>
+        <>
           <label htmlFor={`${id}-input`} className="text-sm font-medium mb-1 w-full">
             {`Chose new photo file`}
           </label>
@@ -87,14 +87,13 @@ export const EditablePhoto: React.FC<EditablePhotoProps> = ({
             required
           />
           <button
-            id={`${id}-button`}
-            type="submit"
+            id={`${id}-button`}            
             onClick={handleSave}
-            className="profile-form-input"
+            className={buttonCalssName}
           >
             Send new photo
           </button>
-        </form>
+        </>
       ) : (
         currentUser && (
           <div

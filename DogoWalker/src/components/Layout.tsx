@@ -1,15 +1,15 @@
 /// <reference types="vite-plugin-svgr/client" />
-import { Link, Outlet } from "react-router-dom";
-import DogoWalker from "../assets/dogo-Walker.svg?react";
-import { useEffect, useState } from "react";
+import { Outlet } from "react-router-dom";
+import { useEffect} from "react";
 import React from "react";
 import { useAuth } from "./AuthContext"; // Import the AuthContext to access currentUser
-import MenuIcon from "@mui/icons-material/Menu";
 import Navigation from "./Navigation";
 
 
 const Layout: React.FC = () => {
   const { currentUser, signOutUser, error } = useAuth(); // Get currentUser directly from context
+
+  useEffect(()=>{},[currentUser?.firebaseUser.uid])
   
   console.log("Layout render, user:", currentUser?.firebaseUser.displayName);
   return (

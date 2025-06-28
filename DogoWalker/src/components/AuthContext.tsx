@@ -214,9 +214,11 @@ export function AuthProvider({ children }) {
 
   const handlePhotoUpdates = async (updates: { profilePhoto?: File | undefined }) => {
     if (currentUser) {
+      console.log("Auth: photo update, current photoURL:", currentUser.firebaseUser.photoURL)
+      
       function extractFileFormat(photoURL) {
         if (!photoURL) return null;
-
+        let format;
         // Decode URL if encoded
         const decodedURL = decodeURIComponent(photoURL);
 
@@ -225,16 +227,18 @@ export function AuthProvider({ children }) {
         const match = decodedURL.match(formatRegex);
 
         if (match) {
-          const format = match[1].toLowerCase();
+          format = match[1].toLowerCase();
           return SupportedPhotoFileFormat.includes(format)
             ? format
-            : setError(`Supported format must have changed, unsupotred format: ${format}`);
+            : format="";
         }
-        setError(`format not found from URL`);
-        return new Error("format not found from URL");
+        if (!format){
+          setError(`format not found from URL`);
+          throw new Error("format not found from URL");
+        }        
       }
 
-      function convertImage(imageFile, maxWidth = 800, maxHeight = 600, quality = 0.9) {
+      function convertImage(imageFile, maxWidth = 600, maxHeight = 600, quality = 0.9) {
         return new Promise((resolve, reject) => {
           const img = new Image();
           
@@ -262,7 +266,7 @@ export function AuthProvider({ children }) {
             canvas.height = height;
             
             // Narysuj obraz na canvas
-            ctx.drawImage(img, 0, 0, width, height);
+            if (ctx) ctx.drawImage(img, 0, 0, width, height);
             
             // Konwertuj do JPEG blob
             canvas.toBlob((blob) => {
@@ -275,46 +279,47 @@ export function AuthProvider({ children }) {
           };
           
           img.onerror = () => reject(new Error('Błąd ładowania obrazu'));
+         
           
-          // Załaduj obraz
-          if (imageFile instanceof File) {
-            const reader = new FileReader();
-            reader.onload = (e) => img.src = e.target.result;
-            reader.readAsDataURL(imageFile);
-          } else {
-            img.src = imageFile; // URL lub base64
-          }
         });
       }
 
       if (updates.profilePhoto) {
-        const profileStoragePatchFormat = `/users/${currentUser.firebaseUser.uid}/profilePhoto`;
+        const profileStoragePatchFormat = `/users/${currentUser.firebaseUser.uid}/profilePhoto/`;
+        console.log(`${profileStoragePatchFormat}${updates.profilePhoto.name}`)
         const newProfilePhotoRef = ref(
           storage,
-          `${profileStoragePatchFormat}/${updates.profilePhoto.name}`
+          `${profileStoragePatchFormat}${updates.profilePhoto.name}`
         );
         let oldPhotoURL = "";
         if(currentUser.firebaseUser.photoURL) {
           oldPhotoURL = currentUser.firebaseUser.photoURL;
         }
+ 
 
         try {
-          await uploadBytes(newProfilePhotoRef, updates.profilePhoto);          
-          const newPhotoURL = await getDownloadURL(newProfilePhotoRef);
+          console.log("file update");
+          const response1 = await uploadBytes(newProfilePhotoRef, updates.profilePhoto); 
+          console.log("upload completed");
+
+          
+          let newPhotoURL = await getDownloadURL(newProfilePhotoRef) ;
+          newPhotoURL?
+          console.log("new url: ", newPhotoURL) :
+          console.log ("XD");
           await updateProfile(currentUser.firebaseUser, {
             photoURL: newPhotoURL,
-          });         
+          });      
         } catch (err) {
-          console.log(err);
           setError(err);
           throw new Error("Error sending file: ", err);
-        }        
+        } 
 
         if (oldPhotoURL) {    //this approach ensures the user will have updated profile photo but in case of error, old file should be deleted manually
-          const oldPhotoFormat = extractFileFormat(currentUser.firebaseUser.photoURL);
+          const oldPhotoFormat = extractFileFormat(oldPhotoURL);
           console.log("Auth: old file type: ", oldPhotoFormat);
-          const oldPhotoFileName = `${currentUser.firebaseUser.uid}${oldPhotoFormat}`;
-          const oldPhotoRef = ref(storage, `${profileStoragePatchFormat}/${oldPhotoFileName}`);
+          const oldPhotoFileName = `userProfile.${oldPhotoFormat}`;
+          const oldPhotoRef = ref(storage, `${profileStoragePatchFormat}${oldPhotoFileName}`);
           try {
             await deleteObject(oldPhotoRef);
           } catch (err) {
