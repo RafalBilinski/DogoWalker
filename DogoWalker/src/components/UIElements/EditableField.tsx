@@ -11,18 +11,19 @@ interface EditableFieldProps {
   textClassName?: string;
 }
 
-export const EditableField: React.FC<EditableFieldProps> = ({
+const EditableField: React.FC<EditableFieldProps> = ({
   id,
   label,
   initialValue,
   onSave,
   containerClassName = "mb-4 profile-form-input active:bg-white ",
   inputClassName = "block p-1 bg-background-primary-light border-b border-gray-300 focus:outline-none focus:border-primary w-full ",
-  placeholder = "",
+  placeholder = "Click to edit",
   textClassName = "cursor-pointer hover:bg-gray-100 p-1  rounded border-b border-transparent",
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentValue, setCurrentValue] = useState(initialValue);
+  
 
   const handleSave = async () => {
     try {
@@ -62,9 +63,10 @@ export const EditableField: React.FC<EditableFieldProps> = ({
         />
       ) : (
         <p id={id} onClick={() => setIsEditing(true)} className={textClassName}>
-          {initialValue || placeholder || "Click to edit"}
+          {currentValue || placeholder }
         </p>
       )}
     </div>
   );
 };
+export default EditableField;

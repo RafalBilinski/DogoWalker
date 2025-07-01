@@ -25,7 +25,6 @@ const Navigation: React.FC = () => {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   useEffect(() => {
-    console.error(`last error: ${error}`);
     setIsUserLoggedIn(!!currentUser); // Convert to boolean using !!
   }, [currentUser?.firebaseUser.uid]); // This will run whenever currentUser
 
@@ -87,7 +86,7 @@ const Navigation: React.FC = () => {
       ],
     },
   };
-  console.log("Navbar render, user:", currentUser?.firebaseUser.displayName);
+  console.log("Navigation render, user ID:", currentUser?.firebaseUser.uid);
   return (
     <nav
       className="w-fit overflow-visible sm:px-5 sm:py-1 self-center 

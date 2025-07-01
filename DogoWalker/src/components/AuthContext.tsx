@@ -238,8 +238,12 @@ export function AuthProvider({ children }) {
         }        
       }
 
-      function convertImage(imageFile, maxWidth = 600, maxHeight = 600, quality = 0.9) {
-        return new Promise((resolve, reject) => {
+      function convertImage(
+        imageFile, 
+        maxWidth = 1000, 
+        maxHeight = 1000, 
+        quality = 0.95) {
+        return new Promise<Blob>((resolve, reject) => {
           const img = new Image();
           
           img.onload = function() {
@@ -276,46 +280,22 @@ export function AuthProvider({ children }) {
                 reject(new Error('Błąd konwersji obrazu'));
               }
             }, 'image/jpeg', quality);
-          };
-          
+          };          
           img.onerror = () => reject(new Error('Błąd ładowania obrazu'));
-         
-          
+          img.src = URL.createObjectURL(imageFile);         
         });
       }
 
       if (updates.profilePhoto) {
-        const profileStoragePatchFormat = `/users/${currentUser.firebaseUser.uid}/profilePhoto/`;
-        console.log(`${profileStoragePatchFormat}${updates.profilePhoto.name}`)
+        const profileStoragePatchFormat = 
+        `/users/${currentUser.firebaseUser.uid}/profilePhoto/`;
         const newProfilePhotoRef = ref(
           storage,
           `${profileStoragePatchFormat}${updates.profilePhoto.name}`
         );
-        let oldPhotoURL = "";
+        
         if(currentUser.firebaseUser.photoURL) {
-          oldPhotoURL = currentUser.firebaseUser.photoURL;
-        }
- 
-
-        try {
-          console.log("file update");
-          const response1 = await uploadBytes(newProfilePhotoRef, updates.profilePhoto); 
-          console.log("upload completed");
-
-          
-          let newPhotoURL = await getDownloadURL(newProfilePhotoRef) ;
-          newPhotoURL?
-          console.log("new url: ", newPhotoURL) :
-          console.log ("XD");
-          await updateProfile(currentUser.firebaseUser, {
-            photoURL: newPhotoURL,
-          });      
-        } catch (err) {
-          setError(err);
-          throw new Error("Error sending file: ", err);
-        } 
-
-        if (oldPhotoURL) {    //this approach ensures the user will have updated profile photo but in case of error, old file should be deleted manually
+          const oldPhotoURL = currentUser.firebaseUser.photoURL;
           const oldPhotoFormat = extractFileFormat(oldPhotoURL);
           console.log("Auth: old file type: ", oldPhotoFormat);
           const oldPhotoFileName = `userProfile.${oldPhotoFormat}`;
@@ -328,6 +308,23 @@ export function AuthProvider({ children }) {
             throw new Error("deletion error  ", err);
           }
         }
+
+        try {
+          const convertedBlob = await convertImage(updates.profilePhoto);
+          const convertedProfilePhoto = new File(
+            [convertedBlob], 
+            'userProfile.jpeg',
+            { type: 'image/jpeg' }
+          );
+          await uploadBytes(newProfilePhotoRef, convertedProfilePhoto);
+          let newPhotoURL = await getDownloadURL(newProfilePhotoRef);
+          await updateProfile(currentUser.firebaseUser, {
+            photoURL: newPhotoURL,
+          });      
+        } catch (err) {
+          setError(err);
+          throw new Error("Error sending file: " + err);
+        } 
       }
     }
   };

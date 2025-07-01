@@ -1,9 +1,9 @@
-import React, { use, useEffect, useState } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
-import { EditableField } from "./UIElements/EditableField";
-import { EditablePhoto } from "./UIElements/EditablePhoto";
-import AddAPhoto from "@mui/icons-material/AddAPhoto" // Ensure you have ionicons installed if you're using icons
+import EditablePhoto from './UIElements/EditablePhoto';
+import EditableField  from "./UIElements/EditableField";
+
 
 const Profile: React.FC = () => {
   const { currentUser, handlePhotoUpdates, handleProfileUpdate } = useAuth(); // Get auth context values
@@ -69,11 +69,14 @@ const Profile: React.FC = () => {
           <h2 className="text-2xl mb-4 col-span-2">
             Your Profile
           </h2>
-          <div id="user-photo-container"  className=" flex justify-center aspect-square min-h-24 min-w-24 max-h-36 max-w-36 mx-auto sm:row-span-2 sm:w-full mb-4">
-            <EditablePhoto
-              id="user-photo"
-              onSave={(newPhotoFile) => handlePhotoUpdates({ profilePhoto: newPhotoFile })}
-            />
+          <div id="user-photo-container"  className=" flex justify-center aspect-square min-h-24 min-w-24 max-h-36 max-w-36 mx-auto sm:row-span-2 sm:w-full mb-4 self-center">
+            <Suspense fallback={<div className="animate-spin rounded-full w-full aspect-square border-t-4 border-l-2 border-b-1 border-emerald-300"></div>}>
+              <EditablePhoto
+                id="user-photo"
+                onSave={(newPhotoFile) => handlePhotoUpdates({ profilePhoto: newPhotoFile })}
+                photoURLSource={currentUser?.firebaseUser.photoURL}
+              />
+            </Suspense>            
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div className="mb-4 profile-form-input">
@@ -93,6 +96,7 @@ const Profile: React.FC = () => {
             label="How you want to be called?"
             initialValue={currentUser?.firebaseUser.displayName || ''}
             onSave={(newValue) => handleProfileUpdate({ newDisplayName: newValue })}
+            
           />
           <EditableField
             id="user-Bio"
@@ -100,6 +104,7 @@ const Profile: React.FC = () => {
             initialValue={currentUser?.bio || ''}
             placeholder="Write something about yourself"
             onSave={(newValue) => handleProfileUpdate({ newBio: newValue })}
+            
           />
           </div>
         </div>

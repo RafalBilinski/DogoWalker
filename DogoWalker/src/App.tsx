@@ -1,8 +1,8 @@
 import "./App.tailwind.css";
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./components/HomePage";
 import HomePage2 from "./components/InternalHomePage";
-import Navbar from "./components/Navigation";
 import Layout from "./components/Layout";
 import Login from "./components/Login";
 import Explore from "./components/Explore";

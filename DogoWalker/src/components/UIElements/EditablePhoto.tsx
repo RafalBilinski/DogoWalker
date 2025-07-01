@@ -6,6 +6,7 @@ import { SupportedPhotoFileFormat } from "../../types/fileTypes";
 interface EditablePhotoProps {
   id: string;
   onSave: (value: File | undefined) => Promise<void>;
+  photoURLSource: string | null | undefined;
   containerClassName?: string;
   inputClassName?: string;
   placeholder?: string;
@@ -13,36 +14,52 @@ interface EditablePhotoProps {
   buttonCalssName?: string;
 }
 
-export const EditablePhoto: React.FC<EditablePhotoProps> = ({
+const EditablePhoto: React.FC<EditablePhotoProps> = ({
   id,
   onSave,
+  photoURLSource,
   containerClassName = "flex flex-col justify-center aspect-square place-items-center ",
-  inputClassName = "profile-form-input mb-2",
+  inputClassName = "profile-form-input my-2",
   photoClassName = "w-full aspect-square object-cover rounded-full cursor-pointer hover:bg-gray-100 p-1 rounded border-b border-transparent",
-  buttonCalssName = "profile-form-input  ",
+  buttonCalssName = "profile-form-input",
 }) => {
   const { currentUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [photoURL, setPhotoURL] = useState(currentUser?.firebaseUser.photoURL);
+  const [photoURL, setPhotoURL] = useState(photoURLSource);
   const [currentFile, setCurrentFile] = useState<File>();
+  const [orginFileName, setOrginFileName] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const initialPhotoURL = photoURL;
 
   const handleSave = async () => {
-    try {
-      await onSave(currentFile);
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Editable photo with id:", id, "error:", error);
-      // Reset to original value on error
-      setPhotoURL(initialPhotoURL);
-      setIsEditing(false);
+    if(currentFile){
+      setIsUploading(true);
+      try {
+        await onSave(currentFile);
+        setIsEditing(false);
+      } catch (error) {
+        console.error("Editable photo with id:", id, "error:", error);
+        // Reset to original value on error
+        setPhotoURL(initialPhotoURL);
+        setIsEditing(false);
+      } finally {
+        setIsUploading(false);
+      }
+    } else {
+      alert("No new file has been selected.")
     }
   };
+
+  const handleAbort = () =>{
+    setIsEditing(false);
+  }
 
   const handleFile = e => {
     const file = e.target.files[0];
     if (!file) return;
     setCurrentFile(file);
+    setOrginFileName(file.name);
     let fileName: string = `userProfile`;
 
     function convertFileTypeToExtension(fileType): string {
@@ -75,38 +92,65 @@ export const EditablePhoto: React.FC<EditablePhotoProps> = ({
     <div id={id} className={containerClassName}>
       {isEditing ? (
         <>
-          <label htmlFor={`${id}-input`} className="text-sm font-medium mb-1 w-full">
-            {`Chose new photo file`}
-          </label>
-          <input
-            id={`${id}-input`}
-            type="file"
-            accept="image/png,image/jpeg,image/gif,image/jpg"
-            onChange={handleFile}
-            className={inputClassName}
-            required
-          />
-          <button
-            id={`${id}-button`}            
-            onClick={handleSave}
-            className={buttonCalssName}
-          >
-            Send new photo
-          </button>
+          {isUploading ? (
+            <div className="flex flex-col items-center justify-center h-screen space-y-4">
+              <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-l-2 border-b-1 border-emerald-300"></div>
+              <p className="text-emerald-300">Uploading...</p>
+            </div>
+
+          ) : (
+            <>
+              <label htmlFor={`${id}-input`} className={currentFile? 'profile-form-input text-center font-bold border-none':'profile-form-input text-center'}>
+                {currentFile? orginFileName : ('Chose new photo')}
+              </label>
+              <input
+                id={`${id}-input`}
+                type="file"
+                accept="image/png,image/jpeg,image/gif,image/jpg"
+                onChange={handleFile}
+                className="hidden"             
+              />
+              <div className="grid grid-cols-2 gap-0.5 w-full">
+              <button
+                id={`${id}-button`}            
+                onClick={handleSave}
+                className={buttonCalssName}            
+              >
+                Send
+              </button>
+              <button
+                id={`${id}-abort-button`}            
+                onClick={handleAbort}
+                className={buttonCalssName}
+              >
+                Abort
+              </button>
+              </div>
+            </>
+          )}
+
         </>
       ) : (
         currentUser && (
           <div
             onClick={() => setIsEditing(true)}
             className="aspect-square w-full  rounded-full bg-gray-300 flex items-center justify-center mb-5 "
-          >
-            {currentUser.firebaseUser.photoURL? (
-              <img
-              id={`${id}-image`}
-              src={currentUser.firebaseUser.photoURL || undefined}
-              alt={`${currentUser.firebaseUser.displayName || "User"}'s profile photo`}
-              className={photoClassName}
-            />
+          >            
+            {currentUser.firebaseUser.photoURL ?(
+              <>
+                {!isImageLoaded && (
+                  <div className="animate-spin rounded-full w-full aspect-square border-t-4 border-l-2 border-b-1 border-b-amber-800"></div>
+                )}
+                <img
+                  id={`${id}-image`}
+                  src={currentUser.firebaseUser.photoURL || undefined}
+                  alt={`${currentUser.firebaseUser.displayName || "User"}'s profile photo`}
+                  className={photoClassName}
+                  onLoad={() => setIsImageLoaded(true)}
+                  onError={() => setIsImageLoaded(false)}
+                  style={{ display: isImageLoaded ? "block" : "none" }}
+                />
+              </>
             ):(
               <AddAPhoto></AddAPhoto>
             )}
@@ -117,3 +161,4 @@ export const EditablePhoto: React.FC<EditablePhotoProps> = ({
     </div>
   );
 };
+export default EditablePhoto;

@@ -14,7 +14,7 @@
   --color-font-primary: white;
   --color-font-secondary: #4a5565;
 
-  --color-background-primary: #4a5565 ; /* gray-600 */
+  --color-background-primary: oklch(71.588% 0.06448 232.022) ; /* gray-600 */
   --color-background-primary-light: #6a7282; /* gray-500 */
   --color-background-primary-dark: #364153; /* gray-700 */
 }
@@ -25,7 +25,7 @@
     @apply transition shadow-none duration-1000;
   }
   .navbar-Button:hover {
-    @apply text-black border-b-sky-500 border-b-2 bg-gray-100;
+    @apply text-black border-b-sky-200 border-b-2 bg-gray-100;
     @apply transition shadow-lg duration-300;
   }
 
