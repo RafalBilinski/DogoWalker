@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { auth, db, storage } from "../firebase-config"; // Ensure you have your Firebase auth initialized
 import {
   onAuthStateChanged,
@@ -11,6 +11,7 @@ import { getDoc, doc, setDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { appCurrentUser } from "../types/dataTypes";
 import { SupportedPhotoFileFormat } from "../types/fileTypes";
+import { handlePhotoUpdates as photoUpdates, handleProfileUpdate as profileUpdates } from "./AuthFeatures/profileUpdates";
 
 type AuthContextType = {
   currentUser: appCurrentUser | null;
@@ -212,120 +213,13 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const handlePhotoUpdates = async (updates: { profilePhoto?: File | undefined }) => {
-    if (currentUser) {
-      console.log("Auth: photo update, current photoURL:", currentUser.firebaseUser.photoURL)
-      
-      function extractFileFormat(photoURL) {
-        if (!photoURL) return null;
-        let format;
-        // Decode URL if encoded
-        const decodedURL = decodeURIComponent(photoURL);
-
-        // Regex do to find file format
-        const formatRegex = /\.([a-zA-Z0-9]+)(?:\?|#|$)/i;
-        const match = decodedURL.match(formatRegex);
-
-        if (match) {
-          format = match[1].toLowerCase();
-          return SupportedPhotoFileFormat.includes(format)
-            ? format
-            : format="";
-        }
-        if (!format){
-          setError(`format not found from URL`);
-          throw new Error("format not found from URL");
-        }        
-      }
-
-      function convertImage(
-        imageFile, 
-        maxWidth = 1000, 
-        maxHeight = 1000, 
-        quality = 0.95) {
-        return new Promise<Blob>((resolve, reject) => {
-          const img = new Image();
-          
-          img.onload = function() {
-            // Oblicz nowe wymiary zachowując proporcje
-            let { width, height } = img;
-            
-            // Sprawdź, który wymiar przekracza limit
-            if (width > height) {
-              if (width > maxWidth) {
-                height = height * (maxWidth / width);
-                width = maxWidth;
-              }
-            } else {
-              if (height > maxHeight) {
-                width = width * (maxHeight / height);
-                height = maxHeight;
-              }
-            }
-            
-            // Utwórz canvas i narysuj przeskalowany obraz
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = width;
-            canvas.height = height;
-            
-            // Narysuj obraz na canvas
-            if (ctx) ctx.drawImage(img, 0, 0, width, height);
-            
-            // Konwertuj do JPEG blob
-            canvas.toBlob((blob) => {
-              if (blob) {
-                resolve(blob);
-              } else {
-                reject(new Error('Błąd konwersji obrazu'));
-              }
-            }, 'image/jpeg', quality);
-          };          
-          img.onerror = () => reject(new Error('Błąd ładowania obrazu'));
-          img.src = URL.createObjectURL(imageFile);         
-        });
-      }
-
-      if (updates.profilePhoto) {
-        const profileStoragePatchFormat = 
-        `/users/${currentUser.firebaseUser.uid}/profilePhoto/`;
-        const newProfilePhotoRef = ref(
-          storage,
-          `${profileStoragePatchFormat}${updates.profilePhoto.name}`
-        );
-        
-        if(currentUser.firebaseUser.photoURL) {
-          const oldPhotoURL = currentUser.firebaseUser.photoURL;
-          const oldPhotoFormat = extractFileFormat(oldPhotoURL);
-          console.log("Auth: old file type: ", oldPhotoFormat);
-          const oldPhotoFileName = `userProfile.${oldPhotoFormat}`;
-          const oldPhotoRef = ref(storage, `${profileStoragePatchFormat}${oldPhotoFileName}`);
-          try {
-            await deleteObject(oldPhotoRef);
-          } catch (err) {
-            setError(err);
-            console.log("current photo URL: ", currentUser.firebaseUser.photoURL);
-            throw new Error("deletion error  ", err);
-          }
-        }
-
-        try {
-          const convertedBlob = await convertImage(updates.profilePhoto);
-          const convertedProfilePhoto = new File(
-            [convertedBlob], 
-            'userProfile.jpeg',
-            { type: 'image/jpeg' }
-          );
-          await uploadBytes(newProfilePhotoRef, convertedProfilePhoto);
-          let newPhotoURL = await getDownloadURL(newProfilePhotoRef);
-          await updateProfile(currentUser.firebaseUser, {
-            photoURL: newPhotoURL,
-          });      
-        } catch (err) {
-          setError(err);
-          throw new Error("Error sending file: " + err);
-        } 
-      }
+  const handlePhotoUpdates = async (updates: { 
+    profilePhoto?: File | undefined 
+  }) => {
+    try {
+      await photoUpdates({ currentUser, setError, updates });
+    } catch (err) {
+      throw new Error(err);
     }
   };
 
@@ -344,55 +238,9 @@ export function AuthProvider({ children }) {
       if (!currentUser?.firebaseUser) {
         throw new Error("No user is currently logged in");
       }
-
-      const userRef = doc(db, "users", currentUser.firebaseUser.uid);
-      const updates_to_apply: any = {};
-
-      // Handle display name update
-      if (updates.newDisplayName) {
-        await updateProfile(currentUser.firebaseUser, {
-          displayName: updates.newDisplayName,
-        });
-      }
-
-      // Handle position update
-      if (updates.lastPosition) {
-        updates_to_apply.lastPosition = updates.lastPosition;
-      }
-      // Handle age update
-      if (updates.newAge !== undefined) {
-        updates_to_apply.age = updates.newAge;
-      }
-      // Handle bio update
-      if (updates.newBio) {
-        updates_to_apply.bio = updates.newBio;
-      }
-
-      console.log("updates_to_apply before Firestore:", updates_to_apply);
-      // Update Firestore if we have any updates
-      if (Object.keys(updates_to_apply).length > 0) {
-        await updateDoc(userRef, updates_to_apply).catch(err => {
-          console.error("Firestore update error:", err);
-          throw new Error("Failed to update profile in Firestore: " + err.message);
-        });
-
-        // Update local state
-        setCurrentUser(prev => {
-          if (!prev) {
-            console.log("No previous user state found to update");
-            return null;
-          }
-          const updated = {
-            ...prev,
-            ...updates_to_apply,
-          };
-          console.log("Updated user state:", updated);
-          return updated;
-        });
-      }
-      console.log("Profile updated successfully");
+      await profileUpdates({currentUser, setCurrentUser, setError, updates});      
     } catch (err: any) {
-      setError(`Profile update error: ${err}`)
+      setError(`Profile update error: ${err}`);
       console.error("Profile update error:", err);
       throw new Error("Failed to update profile: " + err.message);
     }
@@ -444,7 +292,6 @@ export function AuthProvider({ children }) {
     setError,
     handleProfileUpdate,
   };
-  
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 }
