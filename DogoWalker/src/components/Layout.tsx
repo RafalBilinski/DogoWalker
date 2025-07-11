@@ -1,13 +1,15 @@
 /// <reference types="vite-plugin-svgr/client" />
 import { Outlet } from "react-router-dom";
-import { useEffect} from "react";
+import { useEffect } from "react";
 import React from "react";
 import { useAuth } from "./AuthContext"; // Import the AuthContext to access currentUser
 import Navigation from "./Navigation";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 const Layout: React.FC = () => {
-  const { currentUser, signOutUser, error } = useAuth(); // Get currentUser directly from context
+  const { currentUser, error } = useAuth(); // Get currentUser directly from context
 
   useEffect(()=>{},[currentUser?.firebaseUser.uid])
   
@@ -15,12 +17,24 @@ const Layout: React.FC = () => {
   return (
     <div id="site" className="flex flex-col w-screen bg-background-primary ">
       <Navigation />
-      <div
+      <main
         className="container flex mx:0 mx-auto px-0 md:px-4 py-6 min-h-[calc(100vh-3rem)]"
         id="content"
       >
         <Outlet />
-      </div>
+      </main>
+       {/* Toast Container - position in bottom right, auto close after 10s */}
+      <ToastContainer
+        position="bottom-right"
+        autoClose={10000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };

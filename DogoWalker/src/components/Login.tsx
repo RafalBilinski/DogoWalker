@@ -5,6 +5,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+import { showToast } from "../utils/toast";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -13,13 +14,12 @@ const Login: React.FC = () => {
   const [lastName, setlastName] = useState("");
   const [nickname, setNickname] = useState("");
   const [phone, setPhone] = useState(""); // Phone number can be null initially
-  const [error, setError] = useState("");
   const [register, setRegister] = useState<Boolean>(false);
   const [showPassword, setShowPassword] = useState(false);
   const [accountType, setAccountType] = useState("personal"); // Default account type
   const [userCountry, setUserCountry] = useState("pl"); // Default to Poland
   // Get auth context values
-  const { currentUser, handleLogin, handleRegister } = useAuth();
+  const { currentUser, handleLogin, handleRegister, error, setError } = useAuth();
   const navigate = useNavigate();
 
   const toggleRegister = () => {
@@ -37,11 +37,10 @@ const Login: React.FC = () => {
     try {
       await handleLogin(email, password);
     } catch (err: any) {
-      const stringErr = String(err);
-      console.error("Login error:", stringErr);
+      const stringErr = String(err);      
       setError(stringErr || "Invalid email or password.");
-      console.log("Error details passed to state:", error);
-    }
+      console.log("Login comp error:", err);
+    } 
   };
 
   const registerHandler = async (e: React.FormEvent) => {

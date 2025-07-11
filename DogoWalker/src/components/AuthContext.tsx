@@ -1,5 +1,13 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { auth, db, storage } from "../firebase-config"; // Ensure you have your Firebase auth initialized
+import React, { 
+  createContext,
+  useContext,
+  useEffect,
+  useState 
+} from "react";
+import { 
+  auth, 
+  db, 
+} from "../firebase-config"; // Ensure you have your Firebase auth initialized
 import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
@@ -7,11 +15,18 @@ import {
   updateProfile,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { getDoc, doc, setDoc, updateDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { 
+  getDoc, 
+  doc, 
+  setDoc, 
+} from "firebase/firestore";
+
+import { 
+  handlePhotoUpdates as photoUpdates,
+  handleProfileUpdate as profileUpdates 
+} from "./AuthFeatures/profileUpdates";
 import { appCurrentUser } from "../types/dataTypes";
-import { SupportedPhotoFileFormat } from "../types/fileTypes";
-import { handlePhotoUpdates as photoUpdates, handleProfileUpdate as profileUpdates } from "./AuthFeatures/profileUpdates";
+import { showToast } from "../utils/toast";
 
 type AuthContextType = {
   currentUser: appCurrentUser | null;
@@ -86,9 +101,7 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
-export function loginWithEmail(email: string, password: string) {
-  return signInWithEmailAndPassword(auth, email, password);
-}
+
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState<appCurrentUser | null>(null);
@@ -125,20 +138,26 @@ export function AuthProvider({ children }) {
       setCurrentUser(appUserData);
       console.log("User logged in successfully");
       localStorage.setItem("userData", JSON.stringify(appUserData));
+      showToast("Welcome back, " + appUserData.firebaseUser.displayName, "success");
     } catch (err: any) {
       console.error("Auth login error:", err.code);
-      setError(`Auth login error:  ${err.code}`);
+      let errorMessage;
       switch (err.code) {
-        case "auth/invalid-credential":
-          throw new Error("Incorrect password or e-mail. Please try again.");
+        case "auth/invalid-credential":        
+          errorMessage = new Error("Incorrect password or e-mail. Please try again.");
+          break;
         case "auth/too-many-requests":
-          throw new Error("Too many login attempts. Please try again later.");
-        default:
-          throw new Error(
+          errorMessage = new Error("Too many login attempts. Please try again later.");
+          break;
+        default:        
+          errorMessage = new Error(
             "An unexpected error occurred. Please try again. Error code: " + err.code
           );
+          break;
       }
-    }
+      showToast(errorMessage.message, "error");
+      throw errorMessage;
+    } 
   };
 
   const handleRegister = async (
@@ -197,19 +216,27 @@ export function AuthProvider({ children }) {
 
       setCurrentUser(appUserData);
       console.log("User created and profile updated successfully");
+      showToast("Your account have been created successfully! Yay! :)", "success");
     } catch (err: any) {
       console.error("Registration error: ", err.code);
       setError(`Registration error:   ${err.code}`);
+      let errorMessage ;
       switch (err.code) {
         case "auth/email-already-in-use":
-          throw new Error("Email already in use. Please try another one.");
+          errorMessage = new Error("Email already in use. Please try another one.");
+          break;
         case "auth/invalid-email":
-          throw new Error("Invalid email format. Please check your email.");
+          errorMessage = new Error("Invalid email format. Please check your email.");
+          break;
         case "auth/weak-password":
-          throw new Error("Password is too weak. Please choose a stronger password.");
+          errorMessage = new Error("Password is too weak. Please choose a stronger password.");
+          break;
         default:
-          throw new Error("An unexpected error occurred: " + err.message);
+          errorMessage = new Error("An unexpected error occurred: " + err.message);
+          break;
       }
+      showToast(`Cannot creat account: ${errorMessage}`, "error");
+      throw Error(errorMessage);      
     }
   };
 
@@ -219,7 +246,10 @@ export function AuthProvider({ children }) {
     try {
       await photoUpdates({ currentUser, setError, updates });
     } catch (err) {
+      showToast(`Cannot creat account: ${err}`, "error");
       throw new Error(err);
+    } finally {
+      showToast("Profile photo updated successfully", "success");
     }
   };
 
@@ -236,13 +266,15 @@ export function AuthProvider({ children }) {
   }) => {
     try {
       if (!currentUser?.firebaseUser) {
+        showToast("No user is currently logged in", "error");
         throw new Error("No user is currently logged in");
       }
       await profileUpdates({currentUser, setCurrentUser, setError, updates});      
     } catch (err: any) {
       setError(`Profile update error: ${err}`);
       console.error("Profile update error:", err);
-      throw new Error("Failed to update profile: " + err.message);
+      showToast(`Profile update error:: ${err.message}`, "error");
+      throw new Error("Profile update error:: " + err.message);
     }
   };
 
@@ -256,10 +288,12 @@ export function AuthProvider({ children }) {
 
       // Clear any stored user data in localStorage if you're using it
       localStorage.clear();
-
+      showToast("You have been signed out successfully", "success");
       console.log("User signed out successfully");
-    } catch (error) {
-      console.error("Error signing out:", error);
+    } catch (err) {
+      console.error("Error signing out:", err);
+      setError(err);
+      showToast("Failed to sign out. Please try again.", "error");
       throw new Error("Failed to sign out. Please try again.");
     }
   };

@@ -23,6 +23,7 @@
     "react-leaflet": "^5.0.0",
     "react-phone-input-2": "^2.15.1",
     "react-router-dom": "^7.6.0",
+    "react-toastify": "^11.0.5",
     "tailwindcss": "^4.1.7"
   },
   "devDependencies": {

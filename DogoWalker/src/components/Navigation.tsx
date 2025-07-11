@@ -21,7 +21,7 @@ interface NavbarItem {
 }
 
 const Navigation: React.FC = () => {
-  const { currentUser, signOutUser, error } = useAuth(); // Get currentUser directly from context
+  const { currentUser, signOutUser } = useAuth(); // Get currentUser directly from context
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   useEffect(() => {
