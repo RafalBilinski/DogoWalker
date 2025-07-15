@@ -3,6 +3,7 @@ import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvent } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
+import { showToast } from "../utils/toast";
 
 type Position = {
   latitude: number;
@@ -18,8 +19,8 @@ const Explore = () => {
   const { currentUser, handleProfileUpdate } = useAuth();
   const navigate = useNavigate();
   const defaultPosition: Position = {latitude: 52.237049, longitude: 21.017532}; // Warsaw coordinates
-  const [userPosition, setPosition]= useState<Position>(defaultPosition); // Warsaw coordinates
-  console.log("last position:", currentUser?.lastPosition?.latitude, currentUser?.lastPosition?.longitude);
+  const [userPosition, setPosition]= useState<Position>(currentUser?.lastPosition || defaultPosition); // Warsaw coordinates
+  
   
   const RecenterAutomatically: React.FC<RecenterProps> = ({position}) => {
     const map = useMap();
@@ -31,43 +32,43 @@ const Explore = () => {
 
   useEffect(() => {
     if (!currentUser) navigate("/");
-  }, [currentUser, navigate]);
-
-  useEffect(() => {
-    updatePosition();
-    if (userPosition === defaultPosition) {
-      alert("Click on the map to update your position");
-    }
-  }, []);
+  }, [currentUser]);
 
   const updatePosition = async () => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
+
           const newPosition: Position = {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
-          };
-          const localizationTreshold = 0.0000001; // Threshold for position update to avoid too frequent updates
+          };          
+          const localizationTreshold = 0.0001; // Threshold for position update to avoid too frequent updates
+
           if (Math.abs(newPosition.latitude - userPosition.latitude) > localizationTreshold || 
-               Math.abs(newPosition.longitude - userPosition.longitude) > localizationTreshold ) {
-            console.log("Updating position:", newPosition);
+              Math.abs(newPosition.longitude - userPosition.longitude) > localizationTreshold ){
+            
             setPosition(newPosition);
             handleProfileUpdate({ lastPosition: newPosition })
+
               .then(() => {
                 console.log("Position updated successfully");
+                showToast("Position updated", "info");
               })
+
               .catch((error) => {
                 console.error("Error updating position:", error);
-                alert("Failed to update your position. Please try again.");
+                showToast("Failed to update your position. Please try again.", "error");                
               });
-          }
-          
-          
+          }   
         },
         (error) => {
           console.error("Error getting location:", error);
-          alert("Unable to retrieve your location. Please allow location access.");
+          showToast("Unable to retrieve your location. Please allow location access.", "error");          
+        },{
+          enableHighAccuracy: true,
+          timeout: 60000,
+          maximumAge: 60000
         }
       );
     } else {
@@ -75,12 +76,22 @@ const Explore = () => {
     }
   };
 
-  console.log("userPosition:", userPosition, "currentUser:", );
+  useEffect(() => {
+    updatePosition();
+
+    if(userPosition === defaultPosition) {
+      alert("Unable to retrieve your location. Please allow location access.");
+    } 
+  }, []);
+
+  console.log("Explore render. userPosition:", userPosition, );
   return (
     <div className="flex mx-0.5 md:mx-auto w-screen py-5 items-center justify-center h-[calc(100vh-6rem)] bg-gradient-to-br from-primary to-secondary text-white rounded-lg shadow-2xl outline-1 outline-white z-10">
       <div id="map" className="flex w-full h-full p-4 " onClick={updatePosition}>
         <MapContainer
-          center={[defaultPosition.latitude, defaultPosition.longitude]}
+          center={ userPosition === defaultPosition ?
+            [defaultPosition.latitude, defaultPosition.longitude] :
+            [userPosition.latitude, userPosition.longitude]}
           zoom={17}
           maxZoom={18}
           minZoom={5}

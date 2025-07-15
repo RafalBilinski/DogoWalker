@@ -18,24 +18,98 @@ function HomePage() {
           {" " + currentUser?.firebaseUser.displayName + "!"}
         </span>
       </h1>
-      <div className="grid grid-cols-1 items-center w-full h-full p-4 gap-4 sm:grid-cols-3 ">
-        <div className=" md:row-span-2 homePage-section bg-[url('/images/homePage2/forest.png')] " onClick={() => navigate("/explore")}>
-          <h2 className="homePage-section-title "> Explore </h2>
-        </div>
-        <div className=" md:col-span-2 homePage-section bg-[url('/images/homePage2/goldensHug.png')]">
-          <h2 className="homePage-section-title"> Find new friends </h2>
-        </div>
-        <div className=" sm:col-span-2 sm:order-1 md:order-0 md:col-span-1 homePage-section bg-[url('/images/homePage2/peopleWalkingDogs.png')] ">
-          <h2 className="homePage-section-title"> Create community</h2>
-        </div>
-        <div className="md:row-span-2 homePage-section bg-[url('/images/homePage2/takeCare.png')]">
-          <h2 className="homePage-section-title">
+      <div className="grid grid-cols-1 items-center w-full h-full p-4 gap-4 sm:grid-cols-3">
+        {/* Explore section */}
+        <section className="md:row-span-2 homePage-section relative" onClick={() => navigate("/explore")}>
+          <img 
+            src="/images/homePage2/small/forestSmall.png" 
+            className="absolute inset-0 w-full h-full object-cover z-0 homePage-section"  
+            alt=""
+            aria-hidden="true"
+          />
+          <img 
+            src="/images/homePage2/forest.png" 
+            loading="lazy" 
+            className="absolute inset-0 w-full h-full object-cover z-0 homePage-section transition duration-1000 ease-in opacity-0" 
+            alt="Forest background" 
+            onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')}            
+          />
+          <h2 className="homePage-section-title relative z-10 ">Explore</h2>
+        </section>
+        
+        {/* Find new friends section */}
+        <section className="md:col-span-2 homePage-section relative">
+          <img 
+            src="/images/homePage2/small/goldensHugSmall.png" 
+            className="absolute inset-0 w-full h-full object-cover z-0 homePage-section" 
+            alt=""
+            aria-hidden="true"
+          />
+          <img 
+            src="/images/homePage2/goldensHug.png" 
+            loading="lazy" 
+            className="absolute inset-0 w-full h-full object-cover z-0 homePage-section transition duration-1000 ease-in opacity-0" 
+            alt="Golden retrievers hugging" 
+            onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} 
+          />
+          <h2 className="homePage-section-title relative z-10">Find new friends</h2>
+        </section>
+        
+        {/* Create community section */}
+        <section className="sm:col-span-2 sm:order-1 md:order-0 md:col-span-1 homePage-section relative">
+          <img 
+            src="/images/homePage2/small/peopleWalkingDogsSmall.png" 
+            className="absolute inset-0 w-full h-full object-cover z-0 homePage-section" 
+            alt=""
+            aria-hidden="true"
+          />                   
+          <img 
+            src="/images/homePage2/peopleWalkingDogs.png" 
+            loading="lazy" 
+            className="absolute inset-0 w-full h-full object-cover z-0 homePage-section transition duration-1000 ease-in opacity-0" 
+            alt="People walking dogs" 
+            onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} 
+          />
+          <h2 className="homePage-section-title relative z-10">Create community</h2>
+        </section>
+        
+        {/* Take care section */}
+        <section className="md:row-span-2 homePage-section relative">
+          <img 
+            src="/images/homePage2/small/takeCareSmall.png" 
+            className="absolute inset-0 w-full h-full object-cover z-0 homePage-section" 
+            alt=""
+            aria-hidden="true"
+          />
+          <img 
+            src="/images/homePage2/takeCare.png" 
+            loading="lazy" 
+            className="absolute inset-0 w-full h-full object-cover z-0 homePage-section transition duration-1000 ease-in opacity-0" 
+            alt="Taking care of dog" 
+            onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')} 
+          />
+          <h2 className="homePage-section-title relative z-10">
             Take care <span className="hidden sm:block">of your dog</span>
           </h2>
-        </div>
-        <div className=" md:col-span-2 homePage-section bg-[url('/images/homePage2/dogsPlaying.png')] ">
-          <h2 className="homePage-section-title hover:animate-bounce"> Let your dog play! </h2>
-        </div>
+        </section>
+        
+        {/* Let your dog play section */}
+        <section className="md:col-span-2 homePage-section relative">
+          <img 
+            src="/images/homePage2/small/dogsPlayingSmall.png" 
+            className="absolute inset-0 w-full h-full object-cover z-0 homePage-section" 
+            alt=""
+            aria-hidden="true"
+          />
+          <img 
+            src="/images/homePage2/dogsPlaying.png" 
+            loading="lazy" 
+            className="absolute inset-0 w-full h-full object-cover z-0 homePage-section transition duration-1000 ease-in opacity-0" 
+            alt="Dogs playing"
+            onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-100')}  
+          />
+          <h2 className="homePage-section-title hover:animate-bounce relative z-10">Let your dog play!</h2>
+        </section>
       </div>
     </div>
   );

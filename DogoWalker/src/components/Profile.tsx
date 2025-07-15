@@ -32,15 +32,7 @@ const Profile: React.FC = () => {
   };
 
 
-  // Clear error message after a short delay
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => {
-        setError("");
-      }, 10000); // Clear error after 10 seconds
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
+  
   useEffect(() => {
     if (currentUser) {
       setDisplayName(currentUser.firebaseUser.displayName || "");
@@ -52,6 +44,7 @@ const Profile: React.FC = () => {
     }
   }, [currentUser]);
 
+  console.log("Profile component rendered");
   return (
     <div
       className="flex h-fit mx-0.5 md:mx-auto w-full max-w-[1000px] 

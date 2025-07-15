@@ -1,6 +1,5 @@
 /// <reference types="vite-plugin-svgr/client" />
 import { Outlet } from "react-router-dom";
-import { useEffect } from "react";
 import React from "react";
 import { useAuth } from "./AuthContext"; // Import the AuthContext to access currentUser
 import Navigation from "./Navigation";
@@ -9,9 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 
 const Layout: React.FC = () => {
-  const { currentUser, error } = useAuth(); // Get currentUser directly from context
-
-  useEffect(()=>{},[currentUser?.firebaseUser.uid])
+  const { currentUser } = useAuth(); // Get currentUser directly from context  
   
   console.log("Layout render, user:", currentUser?.firebaseUser.displayName);
   return (
@@ -31,7 +28,7 @@ const Layout: React.FC = () => {
         newestOnTop={false}
         closeOnClick
         rtl={false}
-        pauseOnFocusLoss
+        toastStyle={{ backgroundColor: "transparent", backdropFilter: "blur(10px)", color: "white" }}
         draggable
         pauseOnHover
       />

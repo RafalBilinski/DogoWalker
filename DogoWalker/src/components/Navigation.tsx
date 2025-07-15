@@ -22,11 +22,31 @@ interface NavbarItem {
 
 const Navigation: React.FC = () => {
   const { currentUser, signOutUser } = useAuth(); // Get currentUser directly from context
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  useEffect(() => {
-    setIsUserLoggedIn(!!currentUser); // Convert to boolean using !!
-  }, [currentUser?.firebaseUser.uid]); // This will run whenever currentUser
+  const [isScrolled, setIsScrolled] = useState<boolean>(false);
+  let windowsWidth = window.innerWidth;
+
+
+
+useEffect(() => {
+  const handleScroll = () => {
+    // Check if page is scrolled more than 10px
+    setIsScrolled(window.scrollY > 10);
+  };  
+
+  window.addEventListener('scroll', handleScroll);
+  handleScroll();
+  console.log("Navbar useEffect, isScrolled");
+  // Clean up
+  return () => {
+    window.removeEventListener('scroll', handleScroll);
+  };
+}, [isScrolled]);
+
+useEffect(() => {
+  windowsWidth = window.innerWidth;
+  console.log("Navbar useEffect, windowsWidth");
+},[window.innerWidth])
 
   const signOutHandler = async () => {
     try {
@@ -89,8 +109,11 @@ const Navigation: React.FC = () => {
   console.log("Navigation render, user ID:", currentUser?.firebaseUser.uid);
   return (
     <nav
-      className="w-fit overflow-visible sm:px-5 sm:py-1 self-center 
-      rounded-xl bg-neutral-200 border-b-0.5 border-gray-200 shadow-2xl sticky top-2 z-50 backdrop-blur-2xl"
+      className={` w-fit overflow-visible sm:px-5 sm:py-1 self-center 
+      rounded-xl border-b-0.5 border-gray-200 shadow-2xl sticky top-0 sm:top-2 z-50 backdrop-blur-2xl transition duration-600 
+      ${isScrolled 
+      ? 'bg-white backdrop-blur-lg border-gray-500/50 border-1' 
+      : 'bg-neutral-200 border-1'}`}
     >
       <ul className="px-4 flex">
         <li className="flex items-center">
@@ -99,7 +122,7 @@ const Navigation: React.FC = () => {
         <ul className="flex">
           {Object.values(navbarItems).map(
             item =>
-              item.onlyLoggedIn === isUserLoggedIn && //button only shown if user is logged in
+              item.onlyLoggedIn === !!currentUser && //button only shown if user is logged in
               (item.name === "Menu" ? ( // Dropdown menu for "Menu" item
                 <ul className=" flex items-center h-full" key={item.id}>
                   <button
@@ -107,10 +130,10 @@ const Navigation: React.FC = () => {
                     id={item.id}
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
                   >
-                    <span style={{ display: window.innerWidth <= 400 ? "none" : "block" }}>
+                    <span style={{ display: windowsWidth <= 400 ? "none" : "block" }}>
                       {item.name}
                     </span>
-                    <MenuIcon className="mx-5 " />
+                    <MenuIcon className="mx-5 " style={{ display: windowsWidth > 400 ? "none" : "block" }}/>
                   </button>
                   {isMenuOpen && (
                     <div
@@ -145,7 +168,7 @@ const Navigation: React.FC = () => {
           )}
         </ul>
         <li className="ml-auto items-center flex">
-          {isUserLoggedIn ? (
+          {!!currentUser ? (
             <button
               className="px-4 py-2 bg-secondary text-font-primary rounded hover:bg-secondary-dark transition-all duration-300"
               onClick={signOutHandler}

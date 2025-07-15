@@ -34,12 +34,13 @@ const Login: React.FC = () => {
 
   const loginHandler = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await handleLogin(email, password);
+    showToast("Logging in...", "info");
+    try {      
+      await handleLogin(email, password);      
     } catch (err: any) {
       const stringErr = String(err);      
       setError(stringErr || "Invalid email or password.");
-      console.log("Login comp error:", err);
+      console.log("Login error:", err);
     } 
   };
 
@@ -49,7 +50,7 @@ const Login: React.FC = () => {
       await handleRegister(email, password, name, lastName, phone, accountType, nickname);
     } catch (err: any) {
       console.error("Register error:", err);
-      setError(err.message || "Registration failed");
+      setError(err.message );
     }
   };
 
@@ -65,7 +66,7 @@ const Login: React.FC = () => {
     if (error) {
       const timer = setTimeout(() => {
         setError("");
-      }, 10000); // Clear error after 10 seconds
+      }, 4000); // Clear error after 4 seconds
       return () => clearTimeout(timer);
     }
   }, [error]);
@@ -82,7 +83,7 @@ const Login: React.FC = () => {
         console.error("Error fetching location:", error);
       });
   }, []);*/
-
+  console.log("Login rendered");
   return (
     <div
       className="flex flex-col h-fit mx-0.5 md:mx-auto w-full max-w-[600px] 
@@ -312,8 +313,11 @@ const Login: React.FC = () => {
               </span>
             </div>
           </div>
-          <div className="flex items-center justify-between">
-            <button type="submit" className="px-4 py-2 bg-secondary text-font-primary rounded hover:bg-secondary-dark transition-all duration-300 shadow-md">
+          <div className="flex items-center justify-between" >
+            <button 
+              type="submit" 
+              className="px-4 py-2 bg-secondary text-font-primary rounded hover:bg-secondary-dark transition-all duration-300 shadow-md"
+              >
               Login
             </button>
             {error && (
