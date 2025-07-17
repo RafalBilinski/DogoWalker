@@ -42,7 +42,7 @@ const Profile: React.FC = () => {
     } else {
       navigate("/");
     }
-  }, [currentUser]);
+  }, [currentUser?.firebaseUser.displayName, currentUser?.accountType, currentUser?.bio]);
 
   console.log("Profile component rendered");
   return (
@@ -85,19 +85,25 @@ const Profile: React.FC = () => {
             <p id="user-email"> {currentUser?.firebaseUser.email}</p>
           </div>
           <EditableField
-            id="user-displayName"
+            id="user-display-name"
             label="How you want to be called?"
             initialValue={currentUser?.firebaseUser.displayName || ''}
             onSave={(newValue) => handleProfileUpdate({ newDisplayName: newValue })}
             
           />
           <EditableField
-            id="user-Bio"
+            id="user-bio"
             label="Tell us about yourself"
             initialValue={currentUser?.bio || ''}
             placeholder="Write something about yourself"
-            onSave={(newValue) => handleProfileUpdate({ newBio: newValue })}
-            
+            onSave={(newValue) => handleProfileUpdate({ newBio: newValue })}            
+          />
+          <EditableField
+            id="user-age"
+            label="Age"
+            initialValue={currentUser?.age || 0}
+            placeholder="What is your age?"
+            onSave={(newValue) => handleProfileUpdate({ newAge: Number(newValue) })}            
           />
           </div>
         </div>

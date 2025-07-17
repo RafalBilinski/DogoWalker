@@ -3,8 +3,8 @@ import React, { useState } from "react";
 interface EditableFieldProps {
   id: string;
   label?: string;
-  initialValue: string;
-  onSave: (value: string) => Promise<void>;
+  initialValue: any;
+  onSave: (value: any) => Promise<void>;
   containerClassName?: string;
   inputClassName?: string;
   placeholder?: string;
@@ -19,7 +19,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
   containerClassName = "mb-4 profile-form-input active:bg-white ",
   inputClassName = "block p-1 bg-background-primary-light border-b border-gray-300 focus:outline-none focus:border-primary w-full ",
   placeholder = "Click to edit",
-  textClassName = "cursor-pointer hover:bg-gray-100 p-1  rounded border-b border-transparent",
+  textClassName = "block cursor-pointer hover:bg-gray-100 p-1 rounded border-b border-transparent w-full py-1",
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentValue, setCurrentValue] = useState(initialValue);
@@ -29,18 +29,31 @@ const EditableField: React.FC<EditableFieldProps> = ({
     try {
       await onSave(currentValue);
       setIsEditing(false);
-    } catch (error) {
-      console.error("Editable field with id: ",id ,"error: ", error);
+    } catch (err) {
+      console.error("Editable field with id: ",id ,"error: ", err);
       // Reset to original value on error
       setCurrentValue(initialValue);
       setIsEditing(false);
+      throw err;
     }
   };
+  let currentContainerClassName = containerClassName;
+  let currentInputClassName = inputClassName;
+  const initialLabelClassName = "text-sm font-medium mb-1";
+  let currentLabelClassName = initialLabelClassName;
+  if (isEditing) {
+    currentContainerClassName = "mb-4 profile-form-input bg-white ";
+    currentLabelClassName = " text-sm font-medium mb-1 text-secondary";
+  } else {
+    currentContainerClassName = containerClassName;
+  }
+  containerClassName = isEditing ? 
+  "mb-4 profile-form-input bg-white " : containerClassName;
 
   return (
-    <div className={containerClassName}>
+    <div className={currentContainerClassName}>
       {label && (
-        <label htmlFor={id} className="text-sm font-medium mb-1">
+        <label htmlFor={id} className={currentLabelClassName}>
           {label}
         </label>
       )}
