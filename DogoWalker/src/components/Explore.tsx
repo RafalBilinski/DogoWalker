@@ -4,22 +4,17 @@ import { useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvent } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 import { showToast } from "../utils/toast";
-
-type Position = {
-  latitude: number;
-  longitude: number;
-};
+import { GeoPoint } from "firebase/firestore";
 
 interface RecenterProps {
-  position: Position;
+  position: GeoPoint;
 }
-
 
 const Explore = () => {
   const { currentUser, handleProfileUpdate } = useAuth();
   const navigate = useNavigate();
-  const defaultPosition: Position = {latitude: 52.237049, longitude: 21.017532}; // Warsaw coordinates
-  const [userPosition, setPosition]= useState<Position>(currentUser?.lastPosition || defaultPosition); // Warsaw coordinates
+  const defaultPosition = new GeoPoint(52.237049, 21.017532); // Warsaw coordinates
+  const [userPosition, setPosition]= useState<GeoPoint>(currentUser?.lastPosition || defaultPosition); // Warsaw coordinates
   
   
   const RecenterAutomatically: React.FC<RecenterProps> = ({position}) => {
@@ -39,10 +34,10 @@ const Explore = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
 
-          const newPosition: Position = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          };          
+          const newPosition = new GeoPoint(
+            position.coords.latitude,
+            position.coords.longitude
+          );       
           const localizationTreshold = 0.0001; // Threshold for position update to avoid too frequent updates
 
           if (Math.abs(newPosition.latitude - userPosition.latitude) > localizationTreshold || 
@@ -86,7 +81,7 @@ const Explore = () => {
 
   console.log("Explore render. userPosition:", userPosition, );
   return (
-    <div className="flex mx-0.5 md:mx-auto w-screen py-5 items-center justify-center h-[calc(100vh-6rem)] bg-gradient-to-br from-primary to-secondary text-white rounded-lg shadow-2xl outline-1 outline-white z-10">
+    <div className="flex mx-0.5 md:mx-auto w-screen py-5 items-center justify-center h-[calc(100vh-6rem)] bg-gradient-to-br from-transparent to-primary text-white rounded-lg shadow-2xl  z-10">
       <div id="map" className="flex w-full h-full p-4 " onClick={updatePosition}>
         <MapContainer
           center={ userPosition === defaultPosition ?

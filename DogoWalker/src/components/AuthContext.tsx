@@ -18,7 +18,8 @@ import {
 import { 
   getDoc, 
   doc, 
-  setDoc, 
+  setDoc,
+  GeoPoint, 
 } from "firebase/firestore";
 
 import { 
@@ -56,10 +57,7 @@ type AuthContextType = {
 
   handleProfileUpdate: (updates: {
     newDisplayName?: string;
-    lastPosition?: {
-      latitude: number;
-      longitude: number;
-    };
+    lastPosition?: GeoPoint;
     newAge?: number;
     newBio?: string;
     newEmail?: string;
@@ -208,10 +206,7 @@ export function AuthProvider({ children }) {
         firebaseUser: firebaseCurrentUser,
         internalId: userData.internalId,
         accountType: userData.accountType,
-        lastPosition: {
-          latitude: 0,
-          longitude: 0,
-        },
+        lastPosition: new GeoPoint(0, 0),
       };
 
       setCurrentUser(appUserData);
@@ -255,10 +250,7 @@ export function AuthProvider({ children }) {
 
   const handleProfileUpdate = async (updates: {
     newDisplayName?: string;
-    lastPosition?: {
-      latitude: number;
-      longitude: number;
-    };
+    lastPosition?: GeoPoint;
     newAge?: number;
     newBio?: string;
     newEmail?: string;

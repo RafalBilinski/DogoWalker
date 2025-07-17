@@ -1,13 +1,9 @@
 import { updateProfile } from "firebase/auth";
-import { doc, updateDoc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, GeoPoint } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { SupportedPhotoFileFormat } from "../../types/fileTypes";
 import { appCurrentUser } from "../../types/dataTypes";
 import { db, storage } from "../../firebase-config";
-import React, { useState} from "react";
-
-import { useAuth } from "../AuthContext";
-
 
 // Helper: extractFileFormat
 function extractFileFormat(photoURL: string) {
@@ -119,13 +115,13 @@ export async function handleProfileUpdate({
   setCurrentUser,
   setError,
   updates,
-}: {
+} : {
   currentUser: appCurrentUser;
   setError: (err: any) => void;
   setCurrentUser: (cb: (prev: appCurrentUser | null) => appCurrentUser | null) => void;
   updates: {
     newDisplayName?: string;
-    lastPosition?: { latitude: number; longitude: number };
+    lastPosition?: GeoPoint;
     newAge?: number;
     newBio?: string;
     newEmail?: string;
@@ -141,9 +137,15 @@ export async function handleProfileUpdate({
     const updates_to_apply: any = {};
     if (updates.newDisplayName) {
       console.log("display name update:", updates.newDisplayName)
-      await updateProfile(currentUser.firebaseUser, {
+      try{
+        await updateProfile(currentUser.firebaseUser, {
         displayName: updates.newDisplayName,
-      });
+        });
+      } catch(err) {
+        console.error(err);
+        throw err;
+      }
+      
     }
     if (updates.lastPosition) {
       updates_to_apply.lastPosition = updates.lastPosition;
@@ -152,7 +154,7 @@ export async function handleProfileUpdate({
       updates_to_apply.age = updates.newAge;
     }
     if (typeof updates.newBio === "string") {
-      console.log("Bio update:", updates.newBio)
+      console.log("Bio to update:", updates.newBio)
       updates_to_apply.bio = updates.newBio;
     }
     if (Object.keys(updates_to_apply).length > 0) {
@@ -171,12 +173,14 @@ export async function handleProfileUpdate({
     const updatedUserData = await getDoc(userRef);
     if (updatedUserData.exists()) {
       const updatedData = updatedUserData.data();
-      console.log("updated data: ", updatedData);
+      console.log("Updated data from Firestore: ", updatedData);
       setCurrentUser(prev => {
         if (!prev) return null;
         return {
           ...prev,
           bio: updatedData.bio, // update bio from Firestore
+          age: updatedData.age,
+          lastPosition: updatedData.lastPosition,
           // Optionally update other fields if needed
         };
       });

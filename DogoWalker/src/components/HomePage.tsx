@@ -53,7 +53,7 @@ function HomePage() {
           </div>
         </div>
       </section>
-      <section className="py-20 bg-gradient-to-br from-primary to-secondary text-white">
+      <section className="py-20 bg-transparent text-white">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-bold text-center mb-16">See Our App in Action</h2>
           
