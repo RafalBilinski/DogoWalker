@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useState } from "react";
+import React, {  Suspense, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 import EditablePhoto from './UIElements/EditablePhoto';
@@ -67,7 +67,7 @@ const Profile: React.FC = () => {
               <EditablePhoto
                 id="user-photo"
                 onSave={(newPhotoFile) => handlePhotoUpdates({ profilePhoto: newPhotoFile })}
-                photoURLSource={currentUser?.firebaseUser.photoURL}
+                photoURLSource={currentUser?.firebaseUser.photoURL}                
               />
             </Suspense>            
           </div>

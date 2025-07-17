@@ -45,7 +45,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-      <div id="site" className="flex flex-col w-screen bg-background-primary min-h-[600px]">
+      <div id="site" className="flex flex-col bg-gradient-to-b from-secondary to-primary min-h-[600px]">
         <Suspense fallback={<div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100vw", height: "100vh", fontSize: "24px", color: "white", backgroundColor: "#7aabc5"}}>Caching fresh internet :) Give us a sec...</div>}>
           <Navigation />
           <main

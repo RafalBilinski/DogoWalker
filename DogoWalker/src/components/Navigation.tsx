@@ -109,10 +109,10 @@ useEffect(() => {
   console.log("Navigation render, user ID:", currentUser?.firebaseUser.uid);
   return (
     <nav
-      className={` w-fit overflow-visible sm:px-5 sm:py-1 self-center 
-      rounded-xl border-b-0.5 border-gray-200 shadow-2xl sticky top-0 sm:top-2 z-50 backdrop-blur-2xl transition duration-600 
+      className={`  w-full overflow-hidden sm:px-5 sm:py-1 self-center 
+       sm:rounded-none border-b-0.5 border-gray-200 shadow-2xl sticky top-0 sm:top-0 z-50 backdrop-blur-2xl transition duration-600 
       ${isScrolled 
-      ? 'bg-white backdrop-blur-lg border-gray-500/50 border-1' 
+      ? 'bg-white backdrop-blur-lg border-gray-500/50 border-1 opacity-95' 
       : 'bg-neutral-200 border-1'}`}
     >
       <ul className="px-4 flex">

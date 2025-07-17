@@ -11,7 +11,7 @@ function HomePage() {
   }, [currentUser]);
 
   return (
-    <div className="flex flex-col mx-0.5 md:mx-auto w-full md:w-fit py-5 items-center justify-center h-[calc(100vh-6rem)] bg-gradient-to-br from-primary to-secondary  text-white rounded-lg shadow-2xl outline-1 outline-white">
+    <div className="flex flex-col mx-0.5 md:mx-auto w-full md:w-fit py-5 items-center justify-center h-[calc(100vh-6rem)] bg-gradient-to-br from-secondary to-primary  text-white rounded-lg shadow-2xl  ">
       <h1 className="text-2xl md:text-5xl my-4 text-shadow-xs text-shadow-black">
         Welcome back
         <span className="text-gray-700 font-bold text-shadow-xs text-shadow-amber-50">
