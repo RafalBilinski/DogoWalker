@@ -119,12 +119,12 @@ useEffect(() => {
         <li className="flex items-center">
           <DogoWalker className=" h-10 w-10 sm:mr-4 my-1" />
         </li>
-        <ul className="flex">
+        <ul className="flex w-full relative">
           {Object.values(navbarItems).map(
             item =>
               item.onlyLoggedIn === !!currentUser && //button only shown if user is logged in
               (item.name === "Menu" ? ( // Dropdown menu for "Menu" item
-                <ul className=" flex items-center h-full" key={item.id}>
+                <ul className="h-full sm:absolute right-1" key={item.id}>
                   <button
                     className="navbar-Button text-lg h-full"
                     id={item.id}

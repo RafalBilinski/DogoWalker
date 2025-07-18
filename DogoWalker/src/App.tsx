@@ -49,7 +49,7 @@ function App() {
         <Suspense fallback={<div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100vw", height: "100vh", fontSize: "24px", color: "white", backgroundColor: "#7aabc5"}}>Caching fresh internet :) Give us a sec...</div>}>
           <Navigation />
           <main
-            className=" flex mx:0 mx-auto px-0 md:px-4 py-6 min-h-[500px]"
+            className=" flex mx-0 px-0 md:px-4 py-6 min-h-[500px]"
             id="content"
           ><Routes>
               

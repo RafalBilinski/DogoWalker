@@ -187,7 +187,7 @@ export function AuthProvider({ children }) {
       const appUserData: appCurrentUser = {
         firebaseUser: firebaseCurrentUser,
         internalId: userData.internalId,
-        accountType: userData.accountType,
+        accountType: userData.accountType as appCurrentUser["accountType"],
         lastPosition: new GeoPoint(0, 0),
       };
 
@@ -277,7 +277,7 @@ export function AuthProvider({ children }) {
         const appUserData: appCurrentUser = {
           firebaseUser: user,
           internalId: Date.now(), // You might want to generate this differently
-          accountType: "Personal", // Default value, adjust as needed
+          accountType: "personal", // Default value, adjust as needed
         };
         setCurrentUser(appUserData);
       } else {

@@ -6,18 +6,17 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { showToast } from "../utils/toast";
+import { appCurrentUser } from "../types/dataTypes";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [lastName, setlastName] = useState("");
-  const [nickname, setNickname] = useState("");
   const [phone, setPhone] = useState(""); // Phone number can be null initially
   const [register, setRegister] = useState<Boolean>(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [accountType, setAccountType] = useState("personal"); // Default account type
-  const [userCountry, setUserCountry] = useState("pl"); // Default to Poland
+  const [accountType, setAccountType] = useState<appCurrentUser["accountType"]>("personal"); // Default account type
   // Get auth context values
   const { currentUser, handleLogin, handleRegister, error, setError } = useAuth();
   const navigate = useNavigate();
@@ -35,22 +34,38 @@ const Login: React.FC = () => {
   const loginHandler = async (e: React.FormEvent) => {
     e.preventDefault();
     showToast("Logging in...", "info");
-    try {      
-      await handleLogin(email, password);      
+    try {
+      await handleLogin(email, password);
     } catch (err: any) {
-      const stringErr = String(err);      
+      const stringErr = String(err);
       setError(stringErr || "Invalid email or password.");
       console.log("Login error:", err);
-    } 
+    }
   };
 
+  /**
+   * Handles the registration form submission.
+   *
+   * @param {React.FormEvent} e - The form submission event.
+   * @return {Promise<void>} A promise that resolves when the registration is complete.
+   */
   const registerHandler = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!phone || phone.length < 9) {
+      // Minimum phone number length
+      setError("Please enter a valid phone number");
+      showToast("Please enter a valid phone number", "error");
+      return; // Prevent form submission
+    }
+
+    showToast("Registering...", "info");
+
     try {
-      await handleRegister(email, password, name, lastName, phone, accountType, nickname);
+      await handleRegister(email, password, name, lastName, phone, accountType);
     } catch (err: any) {
       console.error("Register error:", err);
-      setError(err.message );
+      setError(err.message);
     }
   };
 
@@ -67,22 +82,13 @@ const Login: React.FC = () => {
       const timer = setTimeout(() => {
         setError("");
       }, 4000); // Clear error after 4 seconds
+      console.log("useEffect with error:", error);
       return () => clearTimeout(timer);
     }
   }, [error]);
 
-  // Get user's country code using the Geolocation API  TODO: move to backend
-  /*useEffect(() => {
-    fetch("https://ipapi.com/json/")
-      .then(response => response.json())
-      .then(data => {
-        setUserCountry(data.country_code.toLowerCase());
-        console.log("User country code:", data.country_code);
-      })
-      .catch(error => {
-        console.error("Error fetching location:", error);
-      });
-  }, []);*/
+  //TODO Get user's country code
+
   console.log("Login rendered");
   return (
     <div
@@ -188,7 +194,7 @@ const Login: React.FC = () => {
                     name="accountType"
                     value="personal"
                     checked={accountType === "personal"}
-                    onChange={e => setAccountType(e.target.value)}
+                    onChange={e => setAccountType(e.target.value as appCurrentUser["accountType"])}
                     className="mr-2"
                   />
                   <label htmlFor="professional">Personal</label>
@@ -200,7 +206,7 @@ const Login: React.FC = () => {
                     name="accountType"
                     value="business"
                     checked={accountType === "business"}
-                    onChange={e => setAccountType(e.target.value)}
+                    onChange={e => setAccountType(e.target.value as appCurrentUser["accountType"])}
                     className="mr-2"
                   />
                   <label htmlFor="business">Business</label>
@@ -214,12 +220,19 @@ const Login: React.FC = () => {
               Phone Number*
             </label>
             <PhoneInput
-              country={userCountry} // default country - change to your preference
+              country="pl" // default country set to Poland <3 :D
               value={phone}
               onChange={value => setPhone(value)}
-              specialLabel=""
-              enableSearch={true}
-              inputStyle={{ background: "transparent", width: "100%",  }}
+              onBlur={() => {
+                if (!phone || phone.length < 9) {
+                  setError("Please enter a valid phone number");
+                }
+              }}
+              specialLabel="Phone number"
+              enableSearch={true}              
+              inputStyle={!!error 
+                ? { background: "red", width: "100%" }
+                : { background: "transparent", width: "100%" }}
               dropdownStyle={{ background: "#6a7282" }}
               buttonStyle={{ background: "transparent" }}
               containerClass="w-full"
@@ -235,14 +248,12 @@ const Login: React.FC = () => {
             />
           </div>
           <div className="flex items-center justify-between">
-            <button type="submit" className="px-4 py-2 bg-secondary text-font-primary rounded hover:bg-secondary-dark transition-all duration-300 shadow-md">
+            <button
+              type="submit"
+              className="px-4 py-2 bg-secondary text-font-primary rounded hover:bg-secondary-dark transition-all duration-300 shadow-md"
+            >
               Register
-            </button>
-            {error && (
-              <p className=" text-red-500 p-2 bg-white rounded-xs mx-2 max-w-[200px] animate-pulse">
-                {error}
-              </p>
-            )}
+            </button>            
           </div>
         </form>
         <div className="flex flex-col items-center my-2 mx-auto">
@@ -313,11 +324,11 @@ const Login: React.FC = () => {
               </span>
             </div>
           </div>
-          <div className="flex items-center justify-between" >
-            <button 
-              type="submit" 
+          <div className="flex items-center justify-between">
+            <button
+              type="submit"
               className="px-4 py-2 bg-secondary text-font-primary rounded hover:bg-secondary-dark transition-all duration-300 shadow-md"
-              >
+            >
               Login
             </button>
             {error && (

@@ -81,7 +81,7 @@ const Explore = () => {
 
   console.log("Explore render. userPosition:", userPosition, );
   return (
-    <div className="flex mx-0.5 md:mx-auto w-screen py-5 items-center justify-center h-[calc(100vh-6rem)] bg-gradient-to-br from-transparent to-primary text-white rounded-lg shadow-2xl  z-10">
+    <div className="flex mx-0.5 md:mx-auto w-full py-5 items-center justify-center h-[calc(100vh-6rem)] bg-gradient-to-br from-transparent to-primary text-white rounded-lg shadow-2xl  z-10">
       <div id="map" className="flex w-full h-full p-4 " onClick={updatePosition}>
         <MapContainer
           center={ userPosition === defaultPosition ?
@@ -91,8 +91,7 @@ const Explore = () => {
           maxZoom={18}
           minZoom={5}
           scrollWheelZoom={true}
-          className="w-full h-full"
-          style={{ height: "100%", width: "100%" }}
+          className="w-full h-full min-w-[300px] min-h-[300px]"          
           closePopupOnClick={true}
           
         >
