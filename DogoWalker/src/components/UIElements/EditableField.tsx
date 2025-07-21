@@ -16,7 +16,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
   label,
   initialValue,
   onSave,
-  containerClassName = "mb-4 profile-form-input active:bg-white ",
+  containerClassName = "profile-form-input active:bg-white ",
   inputClassName = "block p-1 bg-background-primary-light border-b border-gray-300 focus:outline-none focus:border-primary w-full ",
   placeholder = "Click to edit",
   textClassName = "block cursor-pointer hover:bg-gray-100 p-1 rounded border-b border-transparent w-full py-1",

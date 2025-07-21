@@ -13,14 +13,13 @@ const Profile: React.FC = () => {
 
   const toggleProfileUpdate = () => {
     setProfileUpdate(!profileUpdate);
-    setError(""); // Clear any existing errors when toggling   
+    setError(""); // Clear any existing errors when toggling
   };
   // Basic check if userData exists
 
-
   useEffect(() => {
-    if (currentUser) {          
-      showToast("Click field to edit it", "info");
+    if (currentUser) {
+      showToast("Click editable fields to edit it", "info");
     } else {
       navigate("/");
     }
@@ -42,7 +41,7 @@ const Profile: React.FC = () => {
           <h2 className="text-2xl mb-4 col-span-2">Your Profile</h2>
           <div
             id="user-photo-container"
-            className=" flex justify-center aspect-square min-h-24 min-w-24 max-h-36 max-w-36 mx-auto sm:row-span-2 sm:w-full mb-4 self-center"
+            className=" flex justify-center aspect-square min-h-24 min-w-24 max-w-50 mx-auto sm:row-span-2 sm:w-full mb-4 self-center"
           >
             <Suspense
               fallback={
@@ -67,28 +66,34 @@ const Profile: React.FC = () => {
               <label htmlFor="user-email" className="text-sm font-medium mb-1">
                 Your email
               </label>
-              <p id="user-email"> {currentUser?.firebaseUser.email}</p>
+              <p id="user-email cursor-default"> {currentUser?.firebaseUser.email}</p>
             </div>
-            <EditableField
-              id="user-display-name"
-              label="How you want to be called?"
-              initialValue={currentUser?.firebaseUser.displayName || ""}
-              onSave={newValue => handleProfileUpdate({ newDisplayName: newValue })}
-            />
-            <EditableField
-              id="user-bio"
-              label="Tell us about yourself"
-              initialValue={currentUser?.bio}
-              placeholder="Write something about yourself"
-              onSave={newValue => handleProfileUpdate({ newBio: newValue })}
-            />
-            <EditableField
-              id="user-age"
-              label="Age"
-              initialValue={currentUser?.age}
-              placeholder="What is your age?"
-              onSave={newValue => handleProfileUpdate({ newAge: Number(newValue) })}
-            />
+
+            <div id="editable-fields" className="col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <p className="text-md font-medium mb-1 col-span-2 border-t-white border-t-1 p-2">
+                Editable stuff
+              </p>
+              <EditableField
+                id="user-display-name"
+                label="How you want to be called?"
+                initialValue={currentUser?.firebaseUser.displayName || ""}
+                onSave={newValue => handleProfileUpdate({ newDisplayName: newValue })}
+              />
+              <EditableField
+                id="user-bio"
+                label="Tell us about yourself"
+                initialValue={currentUser?.bio}
+                placeholder="Write something about yourself"
+                onSave={newValue => handleProfileUpdate({ newBio: newValue })}
+              />
+              <EditableField
+                id="user-age"
+                label="Age"
+                initialValue={currentUser?.age}
+                placeholder="What is your age?"
+                onSave={newValue => handleProfileUpdate({ newAge: Number(newValue) })}
+              />
+            </div>
           </div>
         </div>
         <div className="flex flex-col items-center my-2 mx-auto">

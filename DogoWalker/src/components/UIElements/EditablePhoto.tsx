@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import AddAPhoto from "@mui/icons-material/AddAPhoto";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 import { useAuth } from "../AuthContext";
 import { SupportedPhotoFileFormat } from "../../types/fileTypes";
+import { showToast } from "../../utils/toast";
 
 interface EditablePhotoProps {
   id: string;
@@ -19,8 +22,7 @@ const EditablePhoto: React.FC<EditablePhotoProps> = ({
   onSave,
   photoURLSource,
   containerClassName = "flex flex-col justify-center aspect-square place-items-center ",
-  inputClassName = "profile-form-input my-2",
-  photoClassName = "w-full aspect-square object-cover rounded-full cursor-pointer hover:bg-gray-100 p-1 rounded border-b border-transparent",
+  photoClassName = "w-full aspect-square object-cover  cursor-pointer hover:bg-gray-100 p-1 rounded border-b border-transparent",
   buttonCalssName = "profile-form-input",
 }) => {
   const { currentUser } = useAuth();
@@ -53,6 +55,7 @@ const EditablePhoto: React.FC<EditablePhotoProps> = ({
 
   const handleAbort = () => {
     setIsEditing(false);
+    setCurrentFile(undefined);
   };
 
   const handleFile = e => {
@@ -98,16 +101,16 @@ const EditablePhoto: React.FC<EditablePhotoProps> = ({
               <p className="text-emerald-300">Uploading...</p>
             </div>
           ) : (
-            <>
+            <div className="flex flex-col items-center justify-center space-y-4 h-full w-full">
               <label
                 htmlFor={`${id}-input`}
                 className={
                   currentFile
-                    ? "profile-form-input text-center font-bold border-none"
-                    : "profile-form-input text-center"
+                    ? "profile-form-input text-center justify-center font-bold border-none h-full w-full"
+                    : "profile-form-input text-center justify-center font-bold h-full w-full"
                 }
               >
-                {currentFile ? orginFileName : "Chose new photo"}
+                {currentFile ? orginFileName : "Chose new photo file"}
               </label>
               <input
                 id={`${id}-input`}
@@ -117,21 +120,23 @@ const EditablePhoto: React.FC<EditablePhotoProps> = ({
                 className="hidden"
               />
               <div className="grid grid-cols-2 gap-0.5 w-full">
-                <button id={`${id}-button`} onClick={handleSave} className={buttonCalssName}>
-                  Send
+                <p className="text-center col-span-2">{currentFile? "Accept change?" : ""}</p>
+                <button id={`${id}-button`} onClick={handleSave} className={buttonCalssName + " bg-emerald-200/40 hover:text-gray-400 hover:bg-emerald-300 hover:animate-pulse"}>
+                 <CheckCircleIcon/> 
                 </button>
-                <button id={`${id}-abort-button`} onClick={handleAbort} className={buttonCalssName}>
-                  Abort
+                <button id={`${id}-abort-button`} onClick={handleAbort} className={buttonCalssName + " bg-rose-200/40"}>
+                  <CancelIcon /> 
                 </button>
               </div>
-            </>
+            </div>
           )}
         </>
       ) : (
         currentUser && (
           <div
             onClick={() => setIsEditing(true)}
-            className="aspect-square w-full  rounded-full bg-gray-300 flex items-center justify-center mb-5 "
+            className="aspect-square w-full  bg-gray-300 flex items-center justify-center mb-5 "
+            onMouseEnter={()=> showToast("Click Your photo to change it! :D", "info")}
           >
             {currentUser.firebaseUser.photoURL ? (
               <>
@@ -146,10 +151,11 @@ const EditablePhoto: React.FC<EditablePhotoProps> = ({
                   onLoad={() => setIsImageLoaded(true)}
                   onError={() => setIsImageLoaded(false)}
                   style={{ display: isImageLoaded ? "block" : "none" }}
+                  title="Click photo to change it"
                 />
               </>
             ) : (
-              <AddAPhoto></AddAPhoto>
+              <AddAPhoto fontSize="inherit" ></AddAPhoto>
             )}
           </div>
         )

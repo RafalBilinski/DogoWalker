@@ -5,6 +5,7 @@ import { useEffect, useState} from "react";
 import React from "react";
 import { useAuth } from "./AuthContext"; // Import the AuthContext to access currentUser
 import MenuIcon from "@mui/icons-material/Menu";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 interface DropdownItem {
   name: string;
@@ -45,6 +46,10 @@ const Navigation: React.FC = () => {
     windowsWidth = window.innerWidth;
     console.log("Navbar useEffect, windowsWidth");
   }, [window.innerWidth]);
+
+  useEffect(() => {
+    console.log("Navbar useEffect, photo changed");    
+  }, [currentUser?.firebaseUser.photoURL]);
 
   const signOutHandler = async () => {
     try {
@@ -107,7 +112,7 @@ const Navigation: React.FC = () => {
   console.log("Navigation render, user ID:", currentUser?.firebaseUser.uid);
   return (
     <nav
-      className={`  w-full overflow-visible sm:px-5 sm:py-1 self-center 
+      className={` w-full overflow-visible sm:px-5 sm:py-1 self-center 
        sm:rounded-none border-b-0.5 border-gray-200 shadow-2xl sticky top-0 sm:top-0 z-50 backdrop-blur-2xl transition duration-600 
       ${
         isScrolled
@@ -115,7 +120,7 @@ const Navigation: React.FC = () => {
           : "bg-neutral-200 border-1"
       }`}
     >
-      <ul className="px-4 flex">
+      <ul className="pl-4 sm:px-0 flex">
         <li className="flex items-center">
           <DogoWalker className=" h-10 w-10 sm:mr-4 my-1" />
         </li>
@@ -134,7 +139,7 @@ const Navigation: React.FC = () => {
                       {item.name}
                     </span>
                     <MenuIcon
-                      className="mx-5 "
+                      className="mx-auto "
                       style={{ display: windowsWidth > 400 ? "none" : "block" }}
                     />
                   </button>
@@ -173,7 +178,7 @@ const Navigation: React.FC = () => {
         <li className="ml-auto items-center flex">
           {!!currentUser ? (
             <button
-              className="px-4 py-2 flex bg-secondary text-font-primary rounded hover:bg-secondary-dark transition-all duration-300"
+              className="px-4 py-2 flex items-center justify-center bg-secondary text-font-primary rounded hover:bg-secondary-dark transition-all duration-300"
               onClick={signOutHandler}
             >
               {currentUser?.firebaseUser.photoURL ? (
@@ -185,7 +190,9 @@ const Navigation: React.FC = () => {
                   <></>
                 
                 )}
-              <span className="w-full px-3 mt-0.5">Logout</span>
+              <span className="w-full px-3 hidden sm:block">Logout</span>
+              <div className="ml-2 w-8 h-8 block sm:hidden "><LogoutIcon  /></div>
+              
             </button>
           ) : (
             <Link
