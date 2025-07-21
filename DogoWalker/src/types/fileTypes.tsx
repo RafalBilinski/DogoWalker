@@ -1,1 +1,1 @@
-export const SupportedPhotoFileFormat =["jpeg", "jpg", "png", "gif"];
+export const SupportedPhotoFileFormat = ["jpeg", "jpg", "png", "gif"];

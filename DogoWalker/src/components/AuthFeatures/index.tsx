@@ -1,4 +1,1 @@
-import { 
-    handlePhotoUpdates, 
-    handleProfileUpdate 
-} from "./profileUpdates";
+import { photoUpdates, profileUpdates } from "./profileUpdates";

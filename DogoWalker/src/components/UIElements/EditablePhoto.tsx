@@ -33,7 +33,7 @@ const EditablePhoto: React.FC<EditablePhotoProps> = ({
   const initialPhotoURL = photoURL;
 
   const handleSave = async () => {
-    if(currentFile){
+    if (currentFile) {
       setIsUploading(true);
       try {
         await onSave(currentFile);
@@ -47,13 +47,13 @@ const EditablePhoto: React.FC<EditablePhotoProps> = ({
         setIsUploading(false);
       }
     } else {
-      alert("No new file has been selected.")
+      alert("No new file has been selected.");
     }
   };
 
-  const handleAbort = () =>{
+  const handleAbort = () => {
     setIsEditing(false);
-  }
+  };
 
   const handleFile = e => {
     const file = e.target.files[0];
@@ -97,46 +97,43 @@ const EditablePhoto: React.FC<EditablePhotoProps> = ({
               <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-l-2 border-b-1 border-emerald-300"></div>
               <p className="text-emerald-300">Uploading...</p>
             </div>
-
           ) : (
             <>
-              <label htmlFor={`${id}-input`} className={currentFile? 'profile-form-input text-center font-bold border-none':'profile-form-input text-center'}>
-                {currentFile? orginFileName : ('Chose new photo')}
+              <label
+                htmlFor={`${id}-input`}
+                className={
+                  currentFile
+                    ? "profile-form-input text-center font-bold border-none"
+                    : "profile-form-input text-center"
+                }
+              >
+                {currentFile ? orginFileName : "Chose new photo"}
               </label>
               <input
                 id={`${id}-input`}
                 type="file"
                 accept="image/png,image/jpeg,image/gif,image/jpg"
                 onChange={handleFile}
-                className="hidden"             
+                className="hidden"
               />
               <div className="grid grid-cols-2 gap-0.5 w-full">
-              <button
-                id={`${id}-button`}            
-                onClick={handleSave}
-                className={buttonCalssName}            
-              >
-                Send
-              </button>
-              <button
-                id={`${id}-abort-button`}            
-                onClick={handleAbort}
-                className={buttonCalssName}
-              >
-                Abort
-              </button>
+                <button id={`${id}-button`} onClick={handleSave} className={buttonCalssName}>
+                  Send
+                </button>
+                <button id={`${id}-abort-button`} onClick={handleAbort} className={buttonCalssName}>
+                  Abort
+                </button>
               </div>
             </>
           )}
-
         </>
       ) : (
         currentUser && (
           <div
             onClick={() => setIsEditing(true)}
             className="aspect-square w-full  rounded-full bg-gray-300 flex items-center justify-center mb-5 "
-          >            
-            {currentUser.firebaseUser.photoURL ?(
+          >
+            {currentUser.firebaseUser.photoURL ? (
               <>
                 {!isImageLoaded && (
                   <div className="animate-spin rounded-full w-full aspect-square border-t-4 border-l-2 border-b-1 border-b-amber-800"></div>
@@ -151,10 +148,9 @@ const EditablePhoto: React.FC<EditablePhotoProps> = ({
                   style={{ display: isImageLoaded ? "block" : "none" }}
                 />
               </>
-            ):(
+            ) : (
               <AddAPhoto></AddAPhoto>
             )}
-            
           </div>
         )
       )}

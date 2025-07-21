@@ -8,9 +8,6 @@
   "arrowParens": "avoid",
   "bracketSpacing": true,
   "jsxSingleQuote": false,
-  "jsxBracketSameLine": false,
-  "parser": "typescript",
-  "files.associations": {
-    "*.tsx": "typescriptreact"
-  }
+  "bracketSameLine": false,
+  "parser": "typescript"  
 }

@@ -26,27 +26,25 @@ const Navigation: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   let windowsWidth = window.innerWidth;
 
+  useEffect(() => {
+    const handleScroll = () => {
+      // Check if page is scrolled more than 10px
+      setIsScrolled(window.scrollY > 10);
+    };
 
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    console.log("Navbar useEffect, isScrolled");
+    // Clean up
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [isScrolled]);
 
-useEffect(() => {
-  const handleScroll = () => {
-    // Check if page is scrolled more than 10px
-    setIsScrolled(window.scrollY > 10);
-  };  
-
-  window.addEventListener('scroll', handleScroll);
-  handleScroll();
-  console.log("Navbar useEffect, isScrolled");
-  // Clean up
-  return () => {
-    window.removeEventListener('scroll', handleScroll);
-  };
-}, [isScrolled]);
-
-useEffect(() => {
-  windowsWidth = window.innerWidth;
-  console.log("Navbar useEffect, windowsWidth");
-},[window.innerWidth])
+  useEffect(() => {
+    windowsWidth = window.innerWidth;
+    console.log("Navbar useEffect, windowsWidth");
+  }, [window.innerWidth]);
 
   const signOutHandler = async () => {
     try {
@@ -111,9 +109,11 @@ useEffect(() => {
     <nav
       className={`  w-full overflow-visible sm:px-5 sm:py-1 self-center 
        sm:rounded-none border-b-0.5 border-gray-200 shadow-2xl sticky top-0 sm:top-0 z-50 backdrop-blur-2xl transition duration-600 
-      ${isScrolled 
-      ? 'bg-white backdrop-blur-lg border-gray-500/50 border-1 opacity-95' 
-      : 'bg-neutral-200 border-1'}`}
+      ${
+        isScrolled
+          ? "bg-white backdrop-blur-lg border-gray-500/50 border-1 opacity-95"
+          : "bg-neutral-200 border-1"
+      }`}
     >
       <ul className="px-4 flex">
         <li className="flex items-center">
@@ -133,7 +133,10 @@ useEffect(() => {
                     <span style={{ display: windowsWidth <= 400 ? "none" : "block" }}>
                       {item.name}
                     </span>
-                    <MenuIcon className="mx-5 " style={{ display: windowsWidth > 400 ? "none" : "block" }}/>
+                    <MenuIcon
+                      className="mx-5 "
+                      style={{ display: windowsWidth > 400 ? "none" : "block" }}
+                    />
                   </button>
                   {isMenuOpen && (
                     <div

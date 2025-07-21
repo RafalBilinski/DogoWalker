@@ -193,7 +193,7 @@ export function AuthProvider({ children }) {
 
       setCurrentUser(appUserData);
       console.log("User created and profile updated successfully" + appUserData);
-      
+
       showToast("Your account have been created successfully! Yay! :)", "success");
     } catch (err: any) {
       console.error("Registration error: ", err.code);

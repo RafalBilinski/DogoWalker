@@ -176,17 +176,15 @@ export async function profileUpdates({
       updates_to_apply.bio = updates.newBio;
     }
     if (Object.keys(updates_to_apply).length > 0) {
-      try{
+      try {
         await updateDoc(userRef, updates_to_apply);
         setCurrentUser(prev => {
           if (!prev) return null;
           return { ...prev, ...updates_to_apply };
         });
-      }
-      catch(err) {
+      } catch (err) {
         throw new Error("Failed to update profile in Firestore: " + err.message);
-      };
-      
+      }
     }
   } catch (err: any) {
     setError(`Profile update error: ${err}`);

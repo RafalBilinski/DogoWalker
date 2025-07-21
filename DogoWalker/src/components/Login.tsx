@@ -229,10 +229,12 @@ const Login: React.FC = () => {
                 }
               }}
               specialLabel="Phone number"
-              enableSearch={true}              
-              inputStyle={!!error 
-                ? { background: "red", width: "100%" }
-                : { background: "transparent", width: "100%" }}
+              enableSearch={true}
+              inputStyle={
+                !!error
+                  ? { background: "red", width: "100%" }
+                  : { background: "transparent", width: "100%" }
+              }
               dropdownStyle={{ background: "#6a7282" }}
               buttonStyle={{ background: "transparent" }}
               containerClass="w-full"
@@ -253,7 +255,7 @@ const Login: React.FC = () => {
               className="px-4 py-2 bg-secondary text-font-primary rounded hover:bg-secondary-dark transition-all duration-300 shadow-md"
             >
               Register
-            </button>            
+            </button>
           </div>
         </form>
         <div className="flex flex-col items-center my-2 mx-auto">

@@ -6,9 +6,9 @@ import { GeoPoint } from "firebase/firestore";
  */
 declare type accountType = "business" | "personal";
 
- /**
+/**
  * Interface for the current user object.
- * 
+ *
  * @property {@link User}   firebaseUser - Firebase User object
  * @property {number} internalId        - User's internal ID
  * @property {@link accountType} accountType  - Business or Personal

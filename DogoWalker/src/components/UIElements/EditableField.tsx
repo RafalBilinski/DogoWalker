@@ -23,14 +23,13 @@ const EditableField: React.FC<EditableFieldProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentValue, setCurrentValue] = useState(initialValue);
-  
 
   const handleSave = async () => {
     try {
       await onSave(currentValue);
       setIsEditing(false);
     } catch (err) {
-      console.error("Editable field with id: ",id ,"error: ", err);
+      console.error("Editable field with id: ", id, "error: ", err);
       // Reset to original value on error
       setCurrentValue(initialValue);
       setIsEditing(false);
@@ -47,8 +46,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
   } else {
     currentContainerClassName = containerClassName;
   }
-  containerClassName = isEditing ? 
-  "mb-4 profile-form-input bg-white " : containerClassName;
+  containerClassName = isEditing ? "mb-4 profile-form-input bg-white " : containerClassName;
 
   return (
     <div className={currentContainerClassName}>
@@ -59,7 +57,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
       )}
       {isEditing ? (
         <input
-          id={id}          
+          id={id}
           type="text"
           value={currentValue}
           onChange={e => setCurrentValue(e.target.value)}
@@ -76,7 +74,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
         />
       ) : (
         <p id={id} onClick={() => setIsEditing(true)} className={textClassName}>
-          {currentValue || placeholder }
+          {currentValue || placeholder}
         </p>
       )}
     </div>

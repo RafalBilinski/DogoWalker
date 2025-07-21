@@ -12,9 +12,9 @@ const defaultOptions: ToastOptions = {
 };
 
 export const showToast = (
-  message: string, 
-  type: (ToastType & {})= "info", 
-  options: (ToastOptions & {}) = {}
+  message: string,
+  type: ToastType & {} = "info",
+  options: ToastOptions & {} = {}
 ) => {
   return toast[type](message, {
     ...defaultOptions,

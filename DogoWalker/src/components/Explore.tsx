@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvent } from "react-leaflet";
-import 'leaflet/dist/leaflet.css';
+import "leaflet/dist/leaflet.css";
 import { showToast } from "../utils/toast";
 import { GeoPoint } from "firebase/firestore";
 
@@ -14,16 +14,18 @@ const Explore = () => {
   const { currentUser, handleProfileUpdate } = useAuth();
   const navigate = useNavigate();
   const defaultPosition = new GeoPoint(52.237049, 21.017532); // Warsaw coordinates
-  const [userPosition, setPosition]= useState<GeoPoint>(currentUser?.lastPosition || defaultPosition); // Warsaw coordinates
-  
-  
-  const RecenterAutomatically: React.FC<RecenterProps> = ({position}) => {
+  const [userPosition, setPosition] = useState<GeoPoint>(
+    currentUser?.lastPosition || defaultPosition
+  ); // Warsaw coordinates
+
+  const RecenterAutomatically: React.FC<RecenterProps> = ({ position }) => {
     const map = useMap();
     useEffect(() => {
       map.setView([position.latitude, position.longitude], map.getZoom());
-    }), [position, map];
+    }),
+      [position, map];
     return null;
-  } 
+  };
 
   useEffect(() => {
     if (!currentUser) navigate("/");
@@ -32,38 +34,35 @@ const Explore = () => {
   const updatePosition = async () => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-
-          const newPosition = new GeoPoint(
-            position.coords.latitude,
-            position.coords.longitude
-          );       
+        position => {
+          const newPosition = new GeoPoint(position.coords.latitude, position.coords.longitude);
           const localizationTreshold = 0.0001; // Threshold for position update to avoid too frequent updates
 
-          if (Math.abs(newPosition.latitude - userPosition.latitude) > localizationTreshold || 
-              Math.abs(newPosition.longitude - userPosition.longitude) > localizationTreshold ){
-            
+          if (
+            Math.abs(newPosition.latitude - userPosition.latitude) > localizationTreshold ||
+            Math.abs(newPosition.longitude - userPosition.longitude) > localizationTreshold
+          ) {
             setPosition(newPosition);
             handleProfileUpdate({ lastPosition: newPosition })
-
               .then(() => {
                 console.log("Position updated successfully");
                 showToast("Position updated", "info");
               })
 
-              .catch((error) => {
+              .catch(error => {
                 console.error("Error updating position:", error);
-                showToast("Failed to update your position. Please try again.", "error");                
+                showToast("Failed to update your position. Please try again.", "error");
               });
-          }   
+          }
         },
-        (error) => {
+        error => {
           console.error("Error getting location:", error);
-          showToast("Unable to retrieve your location. Please allow location access.", "error");          
-        },{
+          showToast("Unable to retrieve your location. Please allow location access.", "error");
+        },
+        {
           enableHighAccuracy: true,
           timeout: 60000,
-          maximumAge: 60000
+          maximumAge: 60000,
         }
       );
     } else {
@@ -74,26 +73,27 @@ const Explore = () => {
   useEffect(() => {
     updatePosition();
 
-    if(userPosition === defaultPosition) {
+    if (userPosition === defaultPosition) {
       alert("Unable to retrieve your location. Please allow location access.");
-    } 
+    }
   }, []);
 
-  console.log("Explore render. userPosition:", userPosition, );
+  console.log("Explore render. userPosition:", userPosition);
   return (
     <div className="flex mx-0.5 md:mx-auto w-full py-5 items-center justify-center h-[calc(100vh-6rem)] bg-gradient-to-br from-transparent to-primary text-white rounded-lg shadow-2xl  z-10">
       <div id="map" className="flex w-full h-full p-4 " onClick={updatePosition}>
         <MapContainer
-          center={ userPosition === defaultPosition ?
-            [defaultPosition.latitude, defaultPosition.longitude] :
-            [userPosition.latitude, userPosition.longitude]}
+          center={
+            userPosition === defaultPosition
+              ? [defaultPosition.latitude, defaultPosition.longitude]
+              : [userPosition.latitude, userPosition.longitude]
+          }
           zoom={17}
           maxZoom={18}
           minZoom={5}
           scrollWheelZoom={true}
-          className="w-full h-full min-w-[300px] min-h-[300px]"          
+          className="w-full h-full min-w-[300px] min-h-[300px]"
           closePopupOnClick={true}
-          
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -102,7 +102,7 @@ const Explore = () => {
           <Marker position={[userPosition.latitude, userPosition.longitude]}>
             <Popup>Your location here!</Popup>
           </Marker>
-          <RecenterAutomatically position={userPosition}  />
+          <RecenterAutomatically position={userPosition} />
         </MapContainer>
       </div>
     </div>

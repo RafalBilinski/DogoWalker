@@ -6,10 +6,9 @@ import Navigation from "./Navigation";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-
 const Layout: React.FC = () => {
-  const { currentUser } = useAuth(); // Get currentUser directly from context  
-  
+  const { currentUser } = useAuth(); // Get currentUser directly from context
+
   console.log("Layout render, user:", currentUser?.firebaseUser.displayName);
   return (
     <div id="site" className="flex flex-col w-screen bg-background-primary ">
@@ -20,7 +19,7 @@ const Layout: React.FC = () => {
       >
         <Outlet />
       </main>
-       {/* Toast Container - position in bottom right, auto close after 10s */}
+      {/* Toast Container - position in bottom right, auto close after 10s */}
       <ToastContainer
         position="bottom-right"
         autoClose={10000}
@@ -28,7 +27,11 @@ const Layout: React.FC = () => {
         newestOnTop={false}
         closeOnClick
         rtl={false}
-        toastStyle={{ backgroundColor: "transparent", backdropFilter: "blur(10px)", color: "white" }}
+        toastStyle={{
+          backgroundColor: "transparent",
+          backdropFilter: "blur(10px)",
+          color: "white",
+        }}
         draggable
         pauseOnHover
       />
