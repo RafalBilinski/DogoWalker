@@ -129,7 +129,7 @@ const Navigation: React.FC = () => {
             item =>
               item.onlyLoggedIn === !!currentUser && //button only shown if user is logged in
               (item.name === "Menu" ? ( // Dropdown menu for "Menu" item
-                <ul className="h-full sm:absolute right-1" key={item.id}>
+                <ul className="h-full absolute right-1" key={item.id}>
                   <button
                     className="navbar-Button text-lg h-full"
                     id={item.id}
