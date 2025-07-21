@@ -143,8 +143,7 @@ export async function profileUpdates({
     lastPosition?: GeoPoint;
     newAge?: number;
     newBio?: string;
-    newEmail?: string;
-    photo?: File | undefined;
+    newEmail?: string;    
   };
 }) {
   const userRef = doc(db, "users", currentUser.firebaseUser.uid);

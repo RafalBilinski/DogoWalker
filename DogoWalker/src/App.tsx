@@ -45,7 +45,7 @@ function App() {
       <BrowserRouter>
         <div
           id="site"
-          className="flex flex-col bg-gradient-to-b from-secondary to-primary min-h-[600px]"
+          className="flex flex-col bg-gradient-to-b from-secondary to-primary min-h-screen"
         >
           <Suspense
             fallback={

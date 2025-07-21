@@ -3,42 +3,28 @@ import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 import EditablePhoto from "./UIElements/EditablePhoto";
 import EditableField from "./UIElements/EditableField";
+import { showToast } from "../utils/toast";
 
 const Profile: React.FC = () => {
   const { currentUser, handlePhotoUpdates, handleProfileUpdate } = useAuth(); // Get auth context values
-  const [bio, setBio] = useState(currentUser?.bio || ""); // Bio can be null initially
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [lastName, setlastName] = useState("");
-  const [displayName, setDisplayName] = useState(currentUser?.firebaseUser.displayName || ""); // Display name for profile update
-  const [isEditingDisplayName, setIsEditingDisplayName] = useState(false); // State to toggle display name editing
-  const [phone, setPhone] = useState(""); // Phone number can be null initially
   const [error, setError] = useState("");
   const [profileUpdate, setProfileUpdate] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [accountType, setAccountType] = useState("personal"); // Default account type
-  const [userCountry, setUserCountry] = useState("pl"); // Default to Poland
   const navigate = useNavigate();
 
   const toggleProfileUpdate = () => {
     setProfileUpdate(!profileUpdate);
-    setError(""); // Clear any existing errors when toggling
-    setShowPassword(false); // Reset password visibility
+    setError(""); // Clear any existing errors when toggling   
   };
+  // Basic check if userData exists
 
-  const toggleShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
 
   useEffect(() => {
-    if (currentUser) {
-      setDisplayName(currentUser.firebaseUser.displayName || "");
-      setAccountType(currentUser.accountType || "personal");
-      setBio(currentUser.bio || "");
+    if (currentUser) {          
+      showToast("Click field to edit it", "info");
     } else {
       navigate("/");
     }
-  }, [currentUser?.firebaseUser.displayName, currentUser?.accountType, currentUser?.bio]);
+  }, [currentUser?.firebaseUser.displayName, currentUser?.age, currentUser?.bio]);
 
   console.log("Profile component rendered");
   return (
@@ -92,14 +78,14 @@ const Profile: React.FC = () => {
             <EditableField
               id="user-bio"
               label="Tell us about yourself"
-              initialValue={currentUser?.bio || ""}
+              initialValue={currentUser?.bio}
               placeholder="Write something about yourself"
               onSave={newValue => handleProfileUpdate({ newBio: newValue })}
             />
             <EditableField
               id="user-age"
               label="Age"
-              initialValue={currentUser?.age || 0}
+              initialValue={currentUser?.age}
               placeholder="What is your age?"
               onSave={newValue => handleProfileUpdate({ newAge: Number(newValue) })}
             />

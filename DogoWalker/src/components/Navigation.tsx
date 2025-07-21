@@ -1,7 +1,7 @@
 /// <reference types="vite-plugin-svgr/client" />
 import { Link } from "react-router-dom";
 import DogoWalker from "../assets/dogo-Walker.svg?react";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState} from "react";
 import React from "react";
 import { useAuth } from "./AuthContext"; // Import the AuthContext to access currentUser
 import MenuIcon from "@mui/icons-material/Menu";
@@ -173,10 +173,19 @@ const Navigation: React.FC = () => {
         <li className="ml-auto items-center flex">
           {!!currentUser ? (
             <button
-              className="px-4 py-2 bg-secondary text-font-primary rounded hover:bg-secondary-dark transition-all duration-300"
+              className="px-4 py-2 flex bg-secondary text-font-primary rounded hover:bg-secondary-dark transition-all duration-300"
               onClick={signOutHandler}
             >
-              Logout
+              {currentUser?.firebaseUser.photoURL ? (
+                <img
+                  src={currentUser?.firebaseUser.photoURL}
+                  alt="Profile"
+                  className="w-8 rounded-full aspect-square hover:hidden"
+                />) : (
+                  <></>
+                
+                )}
+              <span className="w-full px-3 mt-0.5">Logout</span>
             </button>
           ) : (
             <Link

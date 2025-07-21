@@ -25,7 +25,7 @@ export declare interface appCurrentUser {
   accountType: accountType & {}; // Business or Personal
   age?: number; // User's age
   bio?: string; // Optional user bio
-  nickname?: string; // Optional nickname
+  displayName?: string; // Optional nickname
   dogs?: [
     // Array of dogs owned by the user
     {

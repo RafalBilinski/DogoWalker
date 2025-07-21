@@ -8,7 +8,6 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { getDoc, doc, setDoc, GeoPoint } from "firebase/firestore";
-
 import { photoUpdates, profileUpdates } from "./AuthFeatures/profileUpdates";
 import { appCurrentUser } from "../types/dataTypes";
 import { showToast } from "../utils/toast";
@@ -112,7 +111,8 @@ export function AuthProvider({ children }) {
         lastPosition: userData.lastPosition || null,
         dogs: userData.dogs || [],
         friends: userData.friends || [],
-        nickname: userData.nickname || `${userData.name} ${userData.lastName}`,
+        displayName: firebaseUser.displayName || `${userData.name} ${userData.lastName}`,
+        age: userData.age,
       };
 
       setCurrentUser(appUserData);
@@ -235,7 +235,6 @@ export function AuthProvider({ children }) {
     newAge?: number;
     newBio?: string;
     newEmail?: string;
-    photo?: File | undefined;
   }) => {
     try {
       if (!currentUser?.firebaseUser) {
@@ -271,23 +270,84 @@ export function AuthProvider({ children }) {
     }
   };
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, user => {
-      if (user) {
-        const appUserData: appCurrentUser = {
-          firebaseUser: user,
-          internalId: Date.now(), // You might want to generate this differently
-          accountType: "personal", // Default value, adjust as needed
-        };
-        setCurrentUser(appUserData);
-      } else {
-        setCurrentUser(null);
+useEffect(() => {
+  // First try to load from localStorage for immediate UI update
+  const storedUserData = localStorage.getItem("userData");
+  let parsedStoredData: appCurrentUser | null = null;
+  
+  if (storedUserData) {
+    try {
+      parsedStoredData = JSON.parse(storedUserData) as appCurrentUser;
+      // Set current user initially from localStorage
+      setCurrentUser(parsedStoredData);
+    } catch (error) {
+      console.error("Error parsing userData from localStorage:", error);
+    }
+  }
+  
+  // Then verify with Firebase and update with fresh data
+  const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    if (firebaseUser) {
+      try {
+        // Get fresh data from Firestore
+        const userDocRef = doc(db, "users", firebaseUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists()) {
+          const firestoreData = userDoc.data();
+          
+          // Create merged user object
+          const mergedUserData: appCurrentUser = {
+            // Start with Firebase user
+            firebaseUser,
+            
+            // Add Firestore data
+            internalId: firestoreData.internalId,
+            accountType: firestoreData.accountType,
+            bio: firestoreData.bio,
+            age: firestoreData.age,
+            displayName: firestoreData.displayName || firebaseUser.displayName,
+            dogs: firestoreData.dogs || [],
+            lastPosition: firestoreData.lastPosition,
+            friends: firestoreData.friends || [],
+            
+            // If there's stored data, use any fields not in Firestore as fallback
+            ...(parsedStoredData && {
+              // Only include fields not already set from Firestore
+              // This ensures Firestore data takes precedence
+              ...Object.entries(parsedStoredData)
+                .filter(([key, value]) => 
+                  !firestoreData[key] && key !== 'firebaseUser'
+                )
+                .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {})
+            })
+          };
+          
+          // Update state with merged data
+          setCurrentUser(mergedUserData);
+          
+          // Save merged data to localStorage
+          localStorage.setItem("userData", JSON.stringify(mergedUserData));
+        } else {
+          // User document doesn't exist in Firestore
+          console.warn("User document not found in Firestore");
+          setCurrentUser(null);
+          localStorage.removeItem("userData");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setError("Error fetching user data");
       }
-      setLoading(false);
-    });
-
-    return unsubscribe;
-  }, []);
+    } else {
+      // User is signed out
+      setCurrentUser(null);
+      localStorage.removeItem("userData");
+    }
+    setLoading(false);
+  });
+  
+  return () => unsubscribe();
+}, []);
 
   const value = {
     currentUser,
