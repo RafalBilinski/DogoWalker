@@ -38,9 +38,9 @@
   }
   .homePage-section-title{
     @apply text-3xl  text-shadow-black text-shadow-md backdrop-blur-[1px] wrap-break-word mx-auto  min-h-0;
-    @apply lg:text-5xl  my-3 px-5 max-w-11/12;
+    @apply lg:text-5xl px-5 max-w-11/12;
   }
-    .homePage-section-title:hover{
+    .homePage-section:hover{
     @apply  transition duration-600  cursor-pointer text-accent ;
   }
   .homePage-section-title:focus {
@@ -61,7 +61,7 @@
   .login-form-input-label {
     @apply  text-sm font-medium;
   }
-    .profile-form-input {
+  .profile-form-input {
     @apply border p-2 w-full transition-colors duration-300;
     @apply bg-none text-inherit touch-none;
     @apply focus:bg-white focus:text-black;
@@ -72,4 +72,20 @@
     @apply active:bg-white active:text-black;
   }
 
+  .glass {
+    @apply  bg-white/10 backdrop-blur-lg
+            border border-white/20 shadow-md
+            transition-all duration-300 ease-out
+            hover:bg-white/20 hover:shadow-xl
+            active:scale-95
+            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white;
+  }
+
+  .glass-button-animation{
+    @apply  inset-0
+            before:absolute before:inset-0 before:-translate-x-full
+            before:bg-gradient-to-r before:from-transparent before:via-white/70 before:to-transparent
+            before:opacity-0 before:transition before:duration-700
+  }
 }
+

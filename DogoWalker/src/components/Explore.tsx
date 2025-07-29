@@ -20,10 +20,10 @@ const Explore = () => {
 
   const RecenterAutomatically: React.FC<RecenterProps> = ({ position }) => {
     const map = useMap();
-    useEffect(() => {
+    (useEffect(() => {
       map.setView([position.latitude, position.longitude], map.getZoom());
     }),
-      [position, map];
+      [position, map]);
     return null;
   };
 
@@ -80,8 +80,11 @@ const Explore = () => {
 
   console.log("Explore render. userPosition:", userPosition);
   return (
-    <div className="flex mx-0.5 md:mx-auto w-full py-5 items-center justify-center h-[calc(100vh-6rem)] bg-gradient-to-br from-transparent to-primary text-white rounded-lg shadow-2xl  z-10">
-      <div id="map" className="flex w-full h-full p-4 " onClick={updatePosition}>
+    <div
+      className="flex sm:w-full mx-auto max-w-screen p-5 items-center justify-center min-h-[calc(100vh-7rem)] 
+    bg-gradient-to-br from-transparent to-primary text-white rounded-lg shadow-2xl z-10"
+    >
+      <div id="map" className="flex h-full sm:w-full " onClick={updatePosition}>
         <MapContainer
           center={
             userPosition === defaultPosition

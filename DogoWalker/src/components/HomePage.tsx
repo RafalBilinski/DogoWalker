@@ -1,12 +1,12 @@
 function HomePage() {
   return (
     <div
-      className="flex flex-col mx-0.5 md:mx-auto w-full min-h-[500px] items-center justify-center 
+      className="flex flex-col mx-0.5 md:mx-auto w-full min-h-[500px] items-center justify-center max-w-[1200px]
     bg-gradient-to-b from-transparent to-primary  text-white rounded-lg sm:rounded-none shadow-2xl overflow-hidden"
     >
       <section className=" relative h-min-[500px] w-full flex-col items-center sm:px-3 overflow-hidden">
         {/* Background with parallax effect */}
-        <div className="absolute inset-0 bg-[url('../images/homePage2/dogsPlaying.png')] bg-cover bg-center bg-blend-difference bg-white/10 rounded-t-2xl sm:rounded-none"></div>
+        <div className="absolute inset-0 bg-[url('../images/homePage/wolf2.webp')] bg-cover bg-center bg-blend-difference bg-white/20 rounded-t-2xl sm:rounded-none"></div>
 
         {/* Content */}
         <div className="container mx-auto px-6 relative z-10 h-full ">

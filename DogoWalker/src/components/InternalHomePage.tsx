@@ -11,7 +11,10 @@ function HomePage() {
   }, [currentUser]);
 
   return (
-    <div className="flex flex-col mx-0.5 md:mx-auto w-full md:w-fit py-5 items-center justify-center h-[calc(100vh-6rem)] bg-gradient-to-br from-secondary to-primary  text-white rounded-lg shadow-2xl  ">
+    <div
+      className="flex flex-col mx-0.5 md:mx-auto w-full md:w-fit py-5 items-center justify-center min-h-[calc(100vh-7rem)] 
+    bg-gradient-to-br from-secondary to-primary  text-white rounded-lg shadow-2xl  "
+    >
       <h1 className="text-2xl md:text-5xl my-4 text-shadow-xs text-shadow-black">
         Welcome back
         <span className="text-gray-700 font-bold text-shadow-xs text-shadow-amber-50">
@@ -21,7 +24,7 @@ function HomePage() {
       <div className="grid grid-cols-1 items-center w-full h-full p-4 gap-4 sm:grid-cols-3">
         {/* Explore section */}
         <section
-          className="md:row-span-2 homePage-section relative"
+          className="group md:row-span-2 homePage-section relative"
           onClick={() => navigate("/explore")}
         >
           <img
@@ -97,7 +100,7 @@ function HomePage() {
         </section>
 
         {/* Let your dog play section */}
-        <section className="md:col-span-2 homePage-section relative">
+        <section className="group md:col-span-2 homePage-section relative">
           <img
             src="/images/homePage2/small/dogsPlayingSmall.png"
             className="absolute inset-0 w-full h-full object-cover z-0 homePage-section"
@@ -111,7 +114,7 @@ function HomePage() {
             alt="Dogs playing"
             onLoad={e => e.currentTarget.classList.replace("opacity-0", "opacity-100")}
           />
-          <h2 className="homePage-section-title hover:animate-bounce relative z-10">
+          <h2 className="homePage-section-title group-hover:animate-bounce z-10">
             Let your dog play!
           </h2>
         </section>

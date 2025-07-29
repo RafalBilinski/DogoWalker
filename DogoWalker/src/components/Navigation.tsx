@@ -1,11 +1,12 @@
 /// <reference types="vite-plugin-svgr/client" />
 import { Link } from "react-router-dom";
 import DogoWalker from "../assets/dogo-Walker.svg?react";
-import { useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import React from "react";
 import { useAuth } from "./AuthContext"; // Import the AuthContext to access currentUser
 import MenuIcon from "@mui/icons-material/Menu";
-import LogoutIcon from "@mui/icons-material/Logout";
+import LoginIcon from "@mui/icons-material/Login";
+import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
 
 interface DropdownItem {
   name: string;
@@ -18,6 +19,7 @@ interface NavbarItem {
   path: string;
   onlyLoggedIn: boolean;
   id: string;
+  icon?: React.ReactNode;
   dropdownItems?: DropdownItem[];
 }
 
@@ -48,7 +50,7 @@ const Navigation: React.FC = () => {
   }, [window.innerWidth]);
 
   useEffect(() => {
-    console.log("Navbar useEffect, photo changed");    
+    console.log("Navbar useEffect, photo changed");
   }, [currentUser?.firebaseUser.photoURL]);
 
   const signOutHandler = async () => {
@@ -68,19 +70,20 @@ const Navigation: React.FC = () => {
 
   const navbarItems: Record<string, NavbarItem> = {
     home: {
-      name: "Doggo Walker",
+      name: "Home",
       path: "/",
       onlyLoggedIn: false,
       id: "navbar-btn-home",
+      icon: <DogoWalker />
     },
     contact: {
-      name: "Contact",
+      name: "About Us",
       path: "/",
       onlyLoggedIn: false,
       id: "navbar-btn-contact",
     },
     home2: {
-      name: "Doggo Walker",
+      name: "Home",
       path: "/home2",
       onlyLoggedIn: true,
       id: "navbar-btn-home2",
@@ -112,11 +115,13 @@ const Navigation: React.FC = () => {
   console.log("Navigation render, user ID:", currentUser?.firebaseUser.uid);
   return (
     <nav
-      className={` w-full overflow-visible sm:px-5 sm:py-1 self-center 
-       sm:rounded-none border-b-0.5 border-gray-200 shadow-2xl sticky top-0 sm:top-0 z-50 backdrop-blur-2xl transition duration-600 
+      className={`w-full md:w-fit overflow-visible self-center items-center px-1 py-1
+        border-b-0.5 shadow-2xl sticky top-0  z-50 backdrop-blur-2xl transition duration-600
+        sm:px-5 sm:top-1
+       md:rounded   
       ${
         isScrolled
-          ? "bg-white backdrop-blur-lg border-gray-500/50 border-1 opacity-95"
+          ? "glass border-gray-500/50 border-1 opacity-95"
           : "bg-neutral-200 border-1"
       }`}
     >
@@ -129,7 +134,7 @@ const Navigation: React.FC = () => {
             item =>
               item.onlyLoggedIn === !!currentUser && //button only shown if user is logged in
               (item.name === "Menu" ? ( // Dropdown menu for "Menu" item
-                <ul className="h-full absolute right-1" key={item.id}>
+                <ul className="h-full self-end ml-auto md:mx-auto" key={item.id}>
                   <button
                     className="navbar-Button text-lg h-full"
                     id={item.id}
@@ -177,23 +182,30 @@ const Navigation: React.FC = () => {
         </ul>
         <li className="ml-auto items-center flex">
           {!!currentUser ? (
-            <button
-              className="px-4 py-2 flex items-center justify-center bg-secondary text-font-primary rounded hover:bg-secondary-dark transition-all duration-300"
-              onClick={signOutHandler}
-            >
-              {currentUser?.firebaseUser.photoURL ? (
-                <img
-                  src={currentUser?.firebaseUser.photoURL}
-                  alt="Profile"
-                  className="w-8 rounded-full aspect-square hover:hidden"
-                />) : (
+            <>
+              <button
+                className="group px-4 py-2 flex items-center justify-center bg-secondary text-font-primary rounded hover:bg-secondary-light transition-all duration-300"
+                onClick={signOutHandler}
+                title="Logout"
+              >
+                {currentUser?.firebaseUser.photoURL ? (
+                  <img
+                    src={currentUser?.firebaseUser.photoURL}
+                    alt="Profile"
+                    className="w-8 rounded-full aspect-square mx-2"
+                  />
+                ) : (
                   <></>
-                
                 )}
-              <span className="w-full px-3 hidden sm:block">Logout</span>
-              <div className="ml-2 w-8 h-8 block sm:hidden "><LogoutIcon  /></div>
-              
-            </button>
+
+                <div
+                  className="ml-2 w-8 h-8 block  
+                group-hover:text-red-400 transition-all duration-300 mx-2"
+                >
+                  <PowerSettingsNewIcon />
+                </div>
+              </button>
+            </>
           ) : (
             <Link
               to="/login"
