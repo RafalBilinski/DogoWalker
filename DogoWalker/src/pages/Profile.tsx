@@ -1,14 +1,16 @@
 import React, { Suspense, useEffect, useState } from "react";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "../services/AuthFeatures/AuthContext";
 import { useNavigate } from "react-router-dom";
-import EditablePhoto from "./UIElements/EditablePhoto";
-import EditableField from "./UIElements/EditableField";
-import { showToast } from "../utils/toast";
+import EditablePhoto from "../components/EditablePhoto";
+import EditableField from "../components/EditableInput";
+import EditableTextarea from "../components/EditableTextarea";
+import showToast from "../utils/showToast";
 
 const Profile: React.FC = () => {
   const { currentUser, handlePhotoUpdates, handleProfileUpdate } = useAuth(); // Get auth context values
   const [error, setError] = useState("");
   const [profileUpdate, setProfileUpdate] = useState(false);
+  const [isFirstRender, setIsFirstRender] = useState(true);
   const navigate = useNavigate();
 
   const toggleProfileUpdate = () => {
@@ -18,10 +20,13 @@ const Profile: React.FC = () => {
   // Basic check if userData exists
 
   useEffect(() => {
-    if (currentUser) {
-      showToast("Click editable fields to edit it", "info");
-    } else {
-      navigate("/");
+    if (!currentUser) {
+      navigate("/login");
+    }
+
+    if (currentUser && isFirstRender) {
+      showToast("Click editable fields to edit it", "info", { autoClose: 5000 });
+      setIsFirstRender(false);
     }
   }, [currentUser?.firebaseUser.displayName, currentUser?.age, currentUser?.bio]);
 
@@ -37,11 +42,11 @@ const Profile: React.FC = () => {
         className={`flex flex-col duration-700 transition-all min-w-[300px] sm:min-w-[350px] w-full  
         ${!profileUpdate ? `opacity-100 h-auto ` : `opacity-0 h-0 overflow-hidden `} `}
       >
-        <div className="flex flex-col md:grid gap-2 mx-2 bg-gray-500 p-6 rounded shadow-md box-content">
+        <div className="flex flex-col md:grid md:grid-cols-[1fr_2fr] gap-2 mx-2 bg-gray-500 p-6 rounded shadow-md box-content">
           <h2 className="text-2xl mb-4 col-span-2">Your Profile</h2>
           <div
             id="user-photo-container"
-            className=" flex justify-center aspect-square min-h-24 min-w-24 max-w-50 mx-auto sm:row-span-2 sm:w-full mb-4 self-center"
+            className=" flex self-center place-content-center  min-h-24 min-w-24 max-w-50 sm:max-w-90 mx-auto sm:row-span-2 sm:w-full sm:h-full mb-4 sm:mb-0"
           >
             <Suspense
               fallback={
@@ -55,43 +60,44 @@ const Profile: React.FC = () => {
               />
             </Suspense>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div className="mb-4 profile-form-input">
+          <div id="user-info" className="flex-col sm:grid sm:grid-cols-2 gap-2 md:p-2 md:w-full">
+            <div className="mb-2 profile-form-input w-full h-full">
               <label htmlFor="user-internal-id" className="text-sm font-medium mb-1">
                 Your unique ID
               </label>
               <p id="internal-id"> {currentUser?.internalId}</p>
             </div>
-            <div className="mb-4 profile-form-input">
+            <div className="mb-2 profile-form-input w-full h-full">
               <label htmlFor="user-email" className="text-sm font-medium mb-1">
                 Your email
               </label>
               <p id="user-email cursor-default"> {currentUser?.firebaseUser.email}</p>
             </div>
 
-            <div id="editable-fields" className="col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <p className="text-md font-medium mb-1 col-span-2 border-t-white border-t-1 p-2">
-                Editable stuff
-              </p>
+            <div id="editable-fields" className="col-span-2 grid grid-cols-1 sm:grid-cols-2  gap-2">
               <EditableField
                 id="user-display-name"
                 label="How you want to be called?"
                 initialValue={currentUser?.firebaseUser.displayName || ""}
                 onSave={newValue => handleProfileUpdate({ newDisplayName: newValue })}
               />
-              <EditableField
-                id="user-bio"
-                label="Tell us about yourself"
-                initialValue={currentUser?.bio}
-                placeholder="Write something about yourself"
-                onSave={newValue => handleProfileUpdate({ newBio: newValue })}
-              />
+
               <EditableField
                 id="user-age"
                 label="Age"
                 initialValue={currentUser?.age}
                 placeholder="What is your age?"
                 onSave={newValue => handleProfileUpdate({ newAge: Number(newValue) })}
+              />
+
+              <EditableTextarea
+                id="user-bio"
+                label="Tell us about yourself"
+                initialValue={currentUser?.bio}
+                placeholder="Write something about yourself"
+                onSave={newValue => handleProfileUpdate({ newBio: newValue })}
+                addedClassName="sm:col-span-2"
+                charLimit={200}
               />
             </div>
           </div>

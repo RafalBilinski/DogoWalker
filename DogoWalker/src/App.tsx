@@ -1,14 +1,14 @@
 import "./App.tailwind.css";
 import { lazy, useEffect, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import HomePage from "./components/HomePage";
-import HomePage2 from "./components/InternalHomePage";
-import { AuthProvider } from "./components/AuthContext";
-import Navigation from "./components/Navigation";
+import HomePage from "./pages/HomePage";
+import HomePage2 from "./pages/InternalHomePage";
+import { AuthProvider } from "./services/AuthFeatures/AuthContext";
+import Navigation from "./pages/Navigation";
 
-const Login = lazy(() => import("./components/Login"));
-const Explore = lazy(() => import("./components/Explore"));
-const Profile = lazy(() => import("./components/Profile"));
+const Login = lazy(() => import("./pages/Login"));
+const Explore = lazy(() => import("./pages/Explore"));
+const Profile = lazy(() => import("./pages/Profile"));
 
 const ToastContainer = lazy(() =>
   import("react-toastify").then(module => ({
@@ -22,9 +22,9 @@ function App() {
     const preloadComponents = () => {
       // Preload komponentów w tle
       const preloads = [
-        import("./components/Login"),
-        import("./components/Explore"),
-        import("./components/Profile"),
+        import("./pages/Login"),
+        import("./pages/Explore"),
+        import("./pages/Profile"),
         import("react-toastify"),
       ];
 
@@ -34,10 +34,10 @@ function App() {
 
     // Użyj requestIdleCallback do preloadowania gdy przeglądarka jest bezczynna
     if ("requestIdleCallback" in window) {
-      window.requestIdleCallback(preloadComponents, { timeout: 3000 });
+      window.requestIdleCallback(preloadComponents, { timeout: 10000 });
     } else {
       // Fallback dla przeglądarek bez requestIdleCallback
-      setTimeout(preloadComponents, 3000);
+      setTimeout(preloadComponents, 10000);
     }
   }, []);
   return (
@@ -45,7 +45,7 @@ function App() {
       <BrowserRouter>
         <div
           id="site"
-          className="flex flex-col bg-gradient-to-b from-secondary to-primary min-h-screen"
+          className="flex flex-col bg-gradient-to-b from-secondary to-primary min-h-screen h-full"
         >
           <Suspense
             fallback={

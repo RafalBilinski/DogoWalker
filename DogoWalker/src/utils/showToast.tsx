@@ -11,7 +11,7 @@ const defaultOptions: ToastOptions = {
   draggable: true,
 };
 
-export const showToast = (
+ const showToast = (
   message: string,
   type: ToastType & {} = "info",
   options: ToastOptions & {} = {}
@@ -21,3 +21,5 @@ export const showToast = (
     ...options,
   });
 };
+
+export default showToast

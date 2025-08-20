@@ -1,4 +1,4 @@
-import { db } from "../firebase-config";
+import { db } from "../../firebase-config";
 import { collection, addDoc, onSnapshot } from "firebase/firestore";
 
 export const createUserProfile = async (userId, data) => {

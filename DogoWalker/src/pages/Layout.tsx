@@ -1,7 +1,7 @@
 /// <reference types="vite-plugin-svgr/client" />
 import { Outlet } from "react-router-dom";
 import React from "react";
-import { useAuth } from "./AuthContext"; // Import the AuthContext to access currentUser
+import { useAuth } from "../services/AuthFeatures/AuthContext"; // Import the AuthContext to access currentUser
 import Navigation from "./Navigation";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -14,7 +14,7 @@ const Layout: React.FC = () => {
     <div id="site" className="flex flex-col w-screen bg-background-primary ">
       <Navigation />
       <main
-        className="container flex mx:0 mx-auto px-0 md:px-4 py-6 min-h-[calc(100vh-3rem)]"
+        className="flex mx:0 mx-auto px-0 md:px-4 py-6 min-h-[calc(100vh-3rem)] items-center justify-center "
         id="content"
       >
         <Outlet />

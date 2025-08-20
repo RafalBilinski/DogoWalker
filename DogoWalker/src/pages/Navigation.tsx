@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import DogoWalker from "../assets/dogo-Walker.svg?react";
 import { useEffect, useState } from "react";
 import React from "react";
-import { useAuth } from "./AuthContext"; // Import the AuthContext to access currentUser
+import { useAuth } from "../services/AuthFeatures/AuthContext"; // Import the AuthContext to access currentUser
 import MenuIcon from "@mui/icons-material/Menu";
 import LoginIcon from "@mui/icons-material/Login";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
@@ -74,7 +74,7 @@ const Navigation: React.FC = () => {
       path: "/",
       onlyLoggedIn: false,
       id: "navbar-btn-home",
-      icon: <DogoWalker />
+      icon: <DogoWalker />,
     },
     contact: {
       name: "About Us",
@@ -119,11 +119,7 @@ const Navigation: React.FC = () => {
         border-b-0.5 shadow-2xl sticky top-0  z-50 backdrop-blur-2xl transition duration-600
         sm:px-5 sm:top-1
        md:rounded   
-      ${
-        isScrolled
-          ? "glass border-gray-500/50 border-1 opacity-95"
-          : "bg-neutral-200 border-1"
-      }`}
+      ${isScrolled ? "glass border-gray-500/50 border-1 opacity-95" : "bg-neutral-200 border-1"}`}
     >
       <ul className="pl-4 sm:px-0 flex">
         <li className="flex items-center">
@@ -188,10 +184,10 @@ const Navigation: React.FC = () => {
                 onClick={signOutHandler}
                 title="Logout"
               >
-                {currentUser?.firebaseUser.photoURL ? (
+                {!!currentUser?.firebaseUser.photoURL ? (
                   <img
                     src={currentUser?.firebaseUser.photoURL}
-                    alt="Profile"
+                    alt="User Avatar"
                     className="w-8 rounded-full aspect-square mx-2"
                   />
                 ) : (

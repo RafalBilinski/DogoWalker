@@ -1,10 +1,11 @@
 import { useEffect } from "react";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "../services/AuthFeatures/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 function HomePage() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const imgFadeInDuration: number = 500;
 
   useEffect(() => {
     if (!currentUser) navigate("/"); // Redirect to home or dashboard;
@@ -36,7 +37,7 @@ function HomePage() {
           <img
             src="/images/homePage2/forest.png"
             loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover z-0 homePage-section transition duration-1000 ease-in opacity-0"
+            className={`absolute inset-0 w-full h-full object-cover z-0 homePage-section transition duration-${imgFadeInDuration} ease-in opacity-0`}
             alt="Forest background"
             onLoad={e => e.currentTarget.classList.replace("opacity-0", "opacity-100")}
           />
@@ -54,7 +55,7 @@ function HomePage() {
           <img
             src="/images/homePage2/goldensHug.png"
             loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover z-0 homePage-section transition duration-1000 ease-in opacity-0"
+            className={`absolute inset-0 w-full h-full object-cover z-0 homePage-section transition duration-${imgFadeInDuration} ease-in opacity-0`}
             alt="Golden retrievers hugging"
             onLoad={e => e.currentTarget.classList.replace("opacity-0", "opacity-100")}
           />
@@ -72,7 +73,7 @@ function HomePage() {
           <img
             src="/images/homePage2/peopleWalkingDogs.png"
             loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover z-0 homePage-section transition duration-1000 ease-in opacity-0"
+            className={`absolute inset-0 w-full h-full object-cover z-0 homePage-section transition duration-${imgFadeInDuration} ease-in opacity-0`}
             alt="People walking dogs"
             onLoad={e => e.currentTarget.classList.replace("opacity-0", "opacity-100")}
           />
@@ -90,7 +91,7 @@ function HomePage() {
           <img
             src="/images/homePage2/takeCare.png"
             loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover z-0 homePage-section transition duration-1000 ease-in opacity-0"
+            className={`absolute inset-0 w-full h-full object-cover z-0 homePage-section transition duration-${imgFadeInDuration} ease-in opacity-0`}
             alt="Taking care of dog"
             onLoad={e => e.currentTarget.classList.replace("opacity-0", "opacity-100")}
           />
@@ -110,7 +111,7 @@ function HomePage() {
           <img
             src="/images/homePage2/dogsPlaying.png"
             loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover z-0 homePage-section transition duration-1000 ease-in opacity-0"
+            className={`absolute inset-0 w-full h-full object-cover z-0 homePage-section transition duration-${imgFadeInDuration} ease-in opacity-0`}
             alt="Dogs playing"
             onLoad={e => e.currentTarget.classList.replace("opacity-0", "opacity-100")}
           />

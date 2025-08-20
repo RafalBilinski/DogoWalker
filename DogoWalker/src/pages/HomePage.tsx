@@ -1,4 +1,17 @@
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../services/AuthFeatures/AuthContext";
+import { useEffect } from "react";
+
 function HomePage() {
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (currentUser) {
+      console.log("User is logged in, redirecting to /home2");
+      navigate("/home2");
+    }
+  });
+
   return (
     <div
       className="flex flex-col mx-0.5 md:mx-auto w-full min-h-[500px] items-center justify-center max-w-[1200px]

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "../services/AuthFeatures/AuthContext";
 import { useNavigate } from "react-router-dom";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
-import { showToast } from "../utils/toast";
+import { showToast } from "../utils/showToast";
 import { appCurrentUser } from "../types/dataTypes";
 
 const Login: React.FC = () => {

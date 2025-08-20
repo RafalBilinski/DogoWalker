@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { auth, db } from "../firebase-config"; // Ensure you have your Firebase auth initialized
+import { createContext, useContext, useEffect, useState } from "react";
+import { auth, db } from "../../firebase-config"; // Ensure you have your Firebase auth initialized
 import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
@@ -8,9 +8,10 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { getDoc, doc, setDoc, GeoPoint } from "firebase/firestore";
-import { photoUpdates, profileUpdates } from "./AuthFeatures/profileUpdates";
-import { appCurrentUser } from "../types/dataTypes";
-import { showToast } from "../utils/toast";
+import profileUpdates from "../../utils/updates/profileUpdates";
+import photoUpdates from "../../utils/updates/photoUpdates";
+import { appCurrentUser } from "../../types/dataTypes";
+import showToast from "../../utils/showToast";
 
 type AuthContextType = {
   currentUser: appCurrentUser | null;
