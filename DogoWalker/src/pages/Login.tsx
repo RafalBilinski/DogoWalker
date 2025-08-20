@@ -5,7 +5,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
-import { showToast } from "../utils/showToast";
+import showToast  from "../utils/showToast";
 import { appCurrentUser } from "../types/dataTypes";
 
 const Login: React.FC = () => {

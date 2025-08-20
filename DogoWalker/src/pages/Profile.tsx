@@ -18,12 +18,12 @@ const Profile: React.FC = () => {
     setError(""); // Clear any existing errors when toggling
   };
   // Basic check if userData exists
-
   useEffect(() => {
     if (!currentUser) {
       navigate("/login");
     }
-
+  })
+  useEffect(() => { 
     if (currentUser && isFirstRender) {
       showToast("Click editable fields to edit it", "info", { autoClose: 5000 });
       setIsFirstRender(false);
@@ -31,6 +31,7 @@ const Profile: React.FC = () => {
   }, [currentUser?.firebaseUser.displayName, currentUser?.age, currentUser?.bio]);
 
   console.log("Profile component rendered");
+  
   return (
     <div
       className="flex h-fit mx-0.5 md:mx-auto w-full max-w-[1000px] 

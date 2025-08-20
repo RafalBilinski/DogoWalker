@@ -14,7 +14,7 @@ interface EditableFieldProps {
 const EditableField: React.FC<EditableFieldProps> = ({
   id,
   label,
-  initialValue,
+  initialValue="",
   onSave,
   placeholder = "Click to edit",
   addedClassName,
