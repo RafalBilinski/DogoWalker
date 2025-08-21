@@ -8,7 +8,7 @@ function HomePage() {
   const imgFadeInDuration: number = 500;
 
   useEffect(() => {
-    if (!currentUser) navigate("/"); // Redirect to home or dashboard;
+    if (!currentUser) navigate("/login"); // Redirect to login page;
   }, [currentUser]);
 
   return (

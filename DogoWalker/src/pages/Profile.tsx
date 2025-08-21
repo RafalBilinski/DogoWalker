@@ -17,12 +17,13 @@ const Profile: React.FC = () => {
     setProfileUpdate(!profileUpdate);
     setError(""); // Clear any existing errors when toggling
   };
-  // Basic check if userData exists
+
   useEffect(() => {
-    if (!currentUser) {
+    if (!currentUser) {  //Redirect to login page;
       navigate("/login");
     }
   })
+
   useEffect(() => { 
     if (currentUser && isFirstRender) {
       showToast("Click editable fields to edit it", "info", { autoClose: 5000 });
